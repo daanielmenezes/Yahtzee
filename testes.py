@@ -491,200 +491,237 @@ class Test(unittest.TestCase):
         retorno = partida.faz_lancamento(data_horario,[])
         self.assertEqual(retorno,0)
 
-    def test_064_faz_lancamento_nok_partida_inexistente(self):
-        print("Caso de Teste 064 - Erro em fazer lancamento em partida"+
+    def test_064_faz_lancamento_ok_combinacao_gerada_com_sucesso(self):
+        print("Caso de Teste 064 - Faz lancamento em nova partida sucesso.")
+        data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
+        info = partida.obtem_info_partida([data_horario], [])
+        combinacao = info['combinacao_atual']
+        dados = ([ dadoNum for dadoNum in combinacao if 1 <= dadoNum <= 6])
+        #confere que tem 5 numeros [1,6] na lista retornada
+        self.assertTrue( len(dados) == 5 )  
+        
+    def test_065_faz_lancamento_nok_partida_inexistente(self):
+        print("Caso de Teste 065 - Erro em fazer lancamento em partida"+
                 " inexistente.")
         retorno = partida.faz_lancamento("11:01:00:12:23:11",[])
         self.assertEqual( retorno, 1 )
 
-    def test_065_pausa_partida_ok(self):
-        print("Caso de Teste 065 - Partida pausada com sucesso.")
+    def test_066_pausa_partida_ok(self):
+        print("Caso de Teste 066 - Partida pausada com sucesso.")
         data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
         retorno = partida.pausa_partida(data_horario) 
         assertEqual( retorno , 0 )
 
-    def test_066_faz_lancamento_nok_partida_pausada(self):
-        print("Caso de Teste 066 - Erro em fazer lancamento em partida"+
+    def test_067_pausa_partida_ok_status_pausada(self):
+        print("Caso de Teste 067 - Partida pausada com status 'pausada'.")
+        data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
+        status = partida.obtem_info_partida([data_horario], [])['status']
+        assertEqual(status, 'pausada') 
+
+    def test_068_faz_lancamento_nok_partida_pausada(self):
+        print("Caso de Teste 068 - Erro em fazer lancamento em partida"+
                 " pausada.")
         data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
         retorno = partida.faz_lancamento(data_horario,[])
         self.assertEqual( retorno, 2 )
 
-    def test_067_marca_pontuacao_ok_sucesso(self):
-        print("Caso de Teste 067 - Marca pontuacao em uma categoria com"+
+    def test_069_marca_pontuacao_ok_sucesso(self):
+        print("Caso de Teste 069 - Marca pontuacao em uma categoria com"+
                 " sucesso.")
         data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
         partida.faz_lancamento(data_horario,[])
         retorno = partida.marca_pontuacao(data_horario, 'chance')
+        #marca pontos pro flavio e passa pro lucas
         self.assertEqual( retorno, 0 )
 
-    def test_068_marca_pontuacao_ok_pontos_na_tabela(self):
-        print("Caso de Teste 068 - Insere pontuacao na tabela com sucesso"+
-                " sucesso.")
+    def test_070_marca_pontuacao_ok_pontos_na_tabela(self):
+        print("Caso de Teste 070 - Insere pontuacao na tabela com sucesso")
         pts_cat = tabela.obtem_tabelas(['flavio'],[])[-1]['pontos_por_categoria']
         chance = next(cat for cat in pts_cat if cat['nome'] == 'chance')[0] 
-        self.assertNotEqual( chance['pontuacao'], 0 )
+        self.assertGreater( chance['pontuacao'], 0 )
 
-    def test_069_faz_lancamento_nok_partida_encerrada(self):
-        print("Caso de Teste 069 - Erro em fazer lancamento em partida"+
+    def test_071_faz_lancamento_nok_partida_encerrada(self):
+        print("Caso de Teste 071 - Erro em fazer lancamento em partida"+
                 " encerrada.")
         jogador.insere("hugo")
         data_horario = partida.inicia_partida(["hugo"])
         for categoria in categoria.obtem_nomes():
-            #encerrando uma partida marcando todas as categorias
+            #encerra uma partida marcando todas as categorias
             partida.faz_lancamento(data_horario,[])
-            partida.marca_pontuacao(categoria['nome'])
+            partida.marca_pontuacao(data_horario, categoria['nome'])
         retorno = partida.faz_lancamento(data_horario,[])
         self.assertEqual(retorno, 3)
 
-    def test_070_faz_lancamento_nok_indice_invalido(self):
-        print("Caso de Teste 070 - Erro em fazer lancamento com indices de dados"+
-                " invalidos.")
+    def test_072_faz_lancamento_nok_indice_invalido(self):
+        print("Caso de Teste 072 - Erro em fazer lancamento com indices de "+
+                "dados invalidos.")
         data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
         retorno = partida.faz_lancamento(data_horario, [-1,5])
+        #turno do lucas
         self.assertEqual(retorno, 4)
 
-    def test_071_faz_lancamento_nok_indice_primeiro_lancamento_indice(self):
-        print("Caso de Teste 071 - Erro em fazer primeiro lancamento do turno"+
+    def test_073_faz_lancamento_nok_indice_primeiro_lancamento_indice(self):
+        print("Caso de Teste 073 - Erro em fazer primeiro lancamento do turno"+
                 " com indices de dados escolhidos.")
         data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
         retorno = partida.faz_lancamento(data_horario, [1,3])
+        #turno do lucas
         self.assertEqual(retorno, 5)
 
-    def test_072_marca_pontuacao_nok_partida_inexistente(self):
-        print("Caso de Teste 072 - Erro ao marcar pontuacao em partida"+
+    def test_074_marca_pontuacao_nok_partida_inexistente(self):
+        print("Caso de Teste 074 - Erro ao marcar pontuacao em partida"+
                 " inexistente.")
         retorno = partida.marca_pontuacao("11:01:00:10:21:41", 'chance')
         self.assertEqual( retorno, 1 )
 
-    def test_073_marca_pontuacao_nok_partida_pausada(self):
-        print("Caso de Teste 073 - Erro ao marcar pontuacao em partida "+
+    def test_075_marca_pontuacao_nok_partida_pausada(self):
+        print("Caso de Teste 075 - Erro ao marcar pontuacao em partida "+
                 "pausada.")
         data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
         retorno = partida.marca_pontuacao(data_horario, 'chance')
         self.assertEqual( retorno, 2 )
 
-    def test_074_marca_pontuacao_nok_partida_encerrada(self):
-        print("Caso de Teste 074 - Erro ao marcar pontuacao em partida"+
+    def test_076_marca_pontuacao_nok_partida_encerrada(self):
+        print("Caso de Teste 076 - Erro ao marcar pontuacao em partida"+
                 " encerrada.")
         data_horario = tabela.obtem_tabelas(['hugo'],[])[-1]['data_horario']
         retorno = partida.marca_pontuacao(data_horario, 'chance')
         self.assertEqual( retorno, 3 )
 
-    def test_075_marca_pontuacao_nok_categoria_invalida(self):
-        print("Caso de Teste 075 - Erro ao marcar pontuacao invalida.")
+    def test_077_marca_pontuacao_nok_categoria_invalida(self):
+        print("Caso de Teste 077 - Erro ao marcar pontuacao invalida.")
         data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
         partida.faz_lancamento(data_horario, [])
+        #turno do lucas
         retorno = partida.marca_pontuacao(data_horario, 'abacate')
         self.assertEqual( retorno, 4 )
 
-    def test_076_marca_pontuacao_nok_jogador_do_turno_nao_lancou(self):
-        print("Caso de Teste 076 - Erro ao marcar pontuacao sem lancar"+
+    def test_078_marca_pontuacao_nok_jogador_do_turno_nao_lancou(self):
+        print("Caso de Teste 078 - Erro ao marcar pontuacao sem lancar"+
                 " dados no turno.")
         data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
-        partida.marca_pontuacao(data_horario, '1') #marca ptos do ultimo lancamento
-                                              #e passa para o prox jogador
+        partida.marca_pontuacao(data_horario, '1') #marca ptos do lucas
+                                                   #e passa para a julia
         retorno = partida.marca_pontuacao(data_horario, '2')
+        #turno da julia
         self.assertEqual( retorno, 5 )
 
-    def test_077_marca_pontuacao_nok_jogador_ja_marcou_na_categoria(self):
-        print("Caso de Teste 077 - Erro ao marcar pontuacao ja marcada"+
+    def test_079_marca_pontuacao_nok_jogador_ja_marcou_na_categoria(self):
+        print("Caso de Teste 079 - Erro ao marcar pontuacao ja marcada"+
                 " pelo jogador.")
         data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
         #voltando para o turno do flavio:
         partida.faz_lancamento(data_horario, []) 
-        partida.marca_pontuacao(data_horario, 'abacate')
+        partida.marca_pontuacao(data_horario, 'chance')
         #turno do flavio(ja marcou chance em outro teste):
         partida.faz_lancamento(data_horario, []) 
         retorno = partida.marca_pontuacao(data_horario, 'chance')
         self.assertEqual( retorno, 6 )
         
-    def test_078_pausa_partida_nok_partida_pausada(self):
-        print("Caso de Teste 078 - Erro ao pausar uma partida pausada.")
+    def test_080_pausa_partida_nok_partida_inexistente(self):
+        print("Caso de Teste 080 - Erro ao pausar uma partida inexistente.")
+        retorno = partida.pausa_partida("11:01:00:10:21:41")
+        self.assertEqual(retorno, 1)
+
+    def test_081_pausa_partida_nok_partida_pausada(self):
+        print("Caso de Teste 081 - Erro ao pausar uma partida pausada.")
         data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
         retorno = partida.pausa_partida( data_horario )
         self.assertEqual( retorno, 2 )
 
-    def test_079_pausa_partida_nok_partida_encerrada(self):
-        print("Caso de Teste 079 - Erro ao pausar uma partida encerrada.")
+    def test_082_pausa_partida_nok_partida_encerrada(self):
+        print("Caso de Teste 082 - Erro ao pausar uma partida encerrada.")
         data_horario = tabela.obtem_tabelas(['hugo'],[])[-1]['data_horario']
         retorno = partida.pausa_partida( data_horario )
         self.assertEqual( retorno, 3 )
 
-    def test_080_partida_desiste_ok(self):
-        print("Caso de Teste 080 - Desistir da partida com sucesso.")
+    def test_083_partida_desiste_ok(self):
+        print("Caso de Teste 083 - Desistir da partida com sucesso.")
         data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
         retorno = partida.desiste(data_horario, 'julia')
         self.assertEqual( retorno, 0 )
 
-    def test_081_partida_desiste_nok_partida_inexistente(self):
-        print("Caso de Teste 081 - Erro ao pausar uma partida inexistente.")
+    def test_084_partida_desiste_nok_partida_inexistente(self):
+        print("Caso de Teste 084 - Erro ao desistir em uma partida inexistente.")
         retorno = partida.desiste("11:01:00:10:21:41", 'flavio')
         self.assertEqual( retorno, 1 )
 
-    def test_082_partida_desiste_ok_partida_pausada(self):
-        print("Caso de Teste 082 - Erro ao pausar uma partida pausada.")
+    def test_085_partida_desiste_nok_partida_pausada(self):
+        print("Caso de Teste 085 - Erro ao desistir em uma partida pausada.")
         data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
         retorno = partida.desiste(data_horario, 'eleanor')
         self.assertEqual( retorno, 2 )
 
-    def test_083_partida_desiste_nok_partida_encerrada(self):
-        print("Caso de Teste 083 - Erro ao pausar uma partida encerrada.")
+    def test_086_partida_desiste_nok_partida_encerrada(self):
+        print("Caso de Teste 086 - Erro ao desistir em uma partida encerrada.")
         data_horario = tabela.obtem_tabelas(['hugo'],[])[-1]['data_horario']
         retorno = partida.desiste( data_horario, 'hugo' )
         self.assertEqual( retorno, 3 )
 
+    def test_087_partida_desiste_nok_nome_invalido(self):
+        print("Caso de Teste 087 - Erro ao desistir partida de um jogador"+
+                " invalido.")
+        data_horario = tabela.obtem_tabelas(['lucas'],[])[-1]['data_horario']
+        retorno = partida.desiste( data_horario, 'juan' )
+        self.assertEqual( retorno, 4 )
         
-    def test_084_continua_partida_ok(self):
-        print("Caso de Teste 084 - Continua partida com sucesso.")
+    def test_088_partida_desiste_nok_jogador_ja_desistiu(self):
+        print("Caso de Teste 088 - Erro ao desistir partida de um jogador "+
+                "ja desistente.")
+        data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
+        retorno = partida.desiste( data_horario, 'julia' )
+        self.assertEqual( retorno, 5 )
+
+    def test_089_continua_partida_ok(self):
+        print("Caso de Teste 089 - Continua partida com sucesso.")
         data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
         retorno = partida.continua_partida( data_horario )
         self.assertEqual( retorno, 0 )
 
-    def test_085_continua_partida_nok_partida_inexistente(self):
-        print("Caso de Teste 085 - Erro ao continuar uma partida inexistente.")
+    def test_090_continua_partida_nok_partida_inexistente(self):
+        print("Caso de Teste 090 - Erro ao continuar uma partida inexistente.")
         retorno = partida.continua_partida( "11:01:00:10:21:41" )
         self.assertEqual( retorno, 1 )
 
-    def test_086_continua_partida_nok_partida_encerrada(self):
-        print("Caso de Teste 086 - Erro ao continuar uma partida encerrada.")
+    def test_091_continua_partida_nok_partida_encerrada(self):
+        print("Caso de Teste 091 - Erro ao continuar uma partida encerrada.")
         data_horario = tabela.obtem_tabelas(['hugo'],[])[-1]['data_horario']
         retorno = partida.continua_partida( data_horario )
         self.assertEqual( retorno, 3 )
 
-    def test_087_obtem_info_ok_data_horario_correto(self):
-        print("Caso de Teste 087 - Obtem info com data_horario correto.")
+    def test_092_obtem_info_partida_ok_data_horario_correto(self):
+        print("Caso de Teste 092 - Obtem info com data_horario correto.")
         data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
         info_partida_flavio = partida.obtem_info_partida([data_horario], [])[0]
         assertEqual(info_partida_flavio['data_horario'], data_horario)
 
-    def test_088_obtem_info_ok_status_correto(self):
-        print("Caso de Teste 088 - Obtem info com status correto.")
+    def test_093_obtem_info_partida_ok_status_correto(self):
+        print("Caso de Teste 093 - Obtem info com status correto.")
         data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
         info_partida_flavio = partida.obtem_info_partida([data_horario], [])[0]
         assertEqual(info_partida_flavio['status'], 'andamento')
 
-    def test_089_obtem_info_ok_turno_correto(self):
-        print("Caso de Teste 089 - Obtem info com turno_atual correto.")
+    def test_094_obtem_info_partida_ok_turno_correto(self):
+        print("Caso de Teste 094 - Obtem info com turno_atual correto.")
         data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
         info_partida_flavio = partida.obtem_info_partida([data_horario], [])[0]
         assertEqual(info_partida_flavio['turno_atual'], 4)
 
-    def test_090_obtem_info_ok_jogador_da_vez_correto(self):
-        print("Caso de Teste 090 - Obtem info com jogador_da_vez correto.")
+    def test_095_obtem_info_partida_ok_jogador_da_vez_correto(self):
+        print("Caso de Teste 095 - Obtem info com jogador_da_vez correto.")
         data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
         info_partida_flavio = partida.obtem_info_partida([data_horario], [])[0]
         assertEqual(info_partida_flavio['jogador_da_vez'], 'flavio')
 
-    def test_091_obtem_info_ok_tentativas_correto(self):
-        print("Caso de Teste 091 - Obtem info com tentativas restantes correto.")
+    def test_096_obtem_info_partida_ok_tentativas_correto(self):
+        print("Caso de Teste 096 - Obtem info com tentativas restantes correto.")
         data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
         info_partida_flavio = partida.obtem_info_partida([data_horario], [])[0]
         assertEqual(info_partida_flavio['tentativas'], 2)
 
-    def test_092_obtem_info_ok_jogadores_correto(self):
+    def test_097_obtem_info_partida_ok_jogadores_correto(self):
         #considerando que jogadores desistentes continuam registrados
-        print("Caso de Teste 092 - Obtem info com jogadores corretos.")
+        print("Caso de Teste 097 - Obtem info com jogadores corretos.")
         data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
         info_partida_flavio = partida.obtem_info_partida([data_horario], [])[0]
 
@@ -696,5 +733,10 @@ class Test(unittest.TestCase):
 
 
         assertEqual(jogadores_partida, jogadores_cadastrados)
+
+    def test_098_obtem_info_partida_nok_lista_vazia(self):
+        print("Caso de Teste 098 - Obtem info retorna lista vazia se nao achar.")
+        info_partida = partida.obtem_info_partida(["11:01:00:10:21:41"], [])[0]
+        assertEqual(info_partida, [] )
 
 unittest.main()

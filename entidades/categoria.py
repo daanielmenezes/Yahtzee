@@ -1,15 +1,18 @@
+#####################################################################
 # MODULO CATEGORIA
 #
 #  Responsável por guardar os nomes e a descrição de todas as categorias
 #  e disponibilizá-las.
 # 
-#############################
-#  primeira versao: 28/04/20
-#   
+#--------------primeira versao: 28/04/20-----------------
+#  -13 categorias implementadas: 
+#        1,2,3,4,5,6,tripla,quadra, sequencia4, sequencia5, fullhouse
+#        yahtzee e chance
 #
-#
-#
-#
+#  -obtem_nomes implementada e passando em todos os testes
+#  -obtem_descricoes implementada e passando em todos os testes
+#####################################################################
+
 __all__ = ['obtem_nomes', 'obtem_descricoes']
 
 categorias = [ 
