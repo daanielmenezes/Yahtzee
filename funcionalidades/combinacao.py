@@ -8,38 +8,14 @@
 #  Por: Daniel Menezes
 #  -usando mocking do modulo avalia
 #  -gera_combinacao implementada e passando nos testes
-#
-#  A fazer:
-#   - remover mocking quando avalia for implementada
+#--------------v1.0.0: 03/05/2020--------------------
+#  Por: Daniel Menezes
+#  - mocking de avalia removido
 #####################################################################
 
 from . import dado
 
-#from .avalia import avalia_combinacao as avalia
-
-# MODULO AVALIA AINDA NAO IMPLEMENTADO
-# DESCOMENTAR O IMPORT ACIMA QUANDO FOR IMPLEMENTADA
-# E APAGAR O MOCKING ABAIXO: 
-from unittest import mock
-avalia = mock.Mock()
-avalia.return_value = [
-        {'nome': '1', 'pontuacao':10},
-        {'nome': '2', 'pontuacao':10},
-        {'nome': '3', 'pontuacao':10},
-        {'nome': '4', 'pontuacao':10},
-        {'nome': '5', 'pontuacao':10},
-        {'nome': '6', 'pontuacao':10},
-        {'nome': 'tripla', 'pontuacao':10},
-        {'nome': 'quadra', 'pontuacao':10},
-        {'nome': 'fullhouse', 'pontuacao':10},
-        {'nome': 'sequencia4', 'pontuacao':10},
-        {'nome': 'sequencia5', 'pontuacao':10},
-        {'nome': 'yahtzee', 'pontuacao':10},
-        {'nome': 'chance', 'pontuacao':10}
-    ]
-# FIM DO MOCKING
-
-        
+from .avalia import avalia_combinacao as avalia
 
 __all__ = ["gera_combinacao"]
 
