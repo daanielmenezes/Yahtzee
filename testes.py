@@ -68,7 +68,7 @@ class Test(unittest.TestCase):
     def test_008_avalia_combinacao_ok_1(self):
         print("Caso de Teste 008 - Combinacao avaliada corretamente na categoria '1'")
         retorno = avalia.avalia_combinacao([1,2,1,5,1])
-        self.assertIn( {'nome':'1', 'pontuacao':2}, retorno )
+        self.assertIn( {'nome':'1', 'pontuacao':3}, retorno )
     
     def test_009_avalia_combinacao_ok_2(self):
         print("Caso de Teste 009 - Combinacao avaliada corretamente na categoria '2'")
