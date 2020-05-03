@@ -1,0 +1,7 @@
+testeDado.py
+testeCategoria.py
+testeAvalia.py
+testeCombinacao.py
+testeJogador.py
+testeTabela.py
+testePartida.py
