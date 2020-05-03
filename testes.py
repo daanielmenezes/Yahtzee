@@ -167,7 +167,7 @@ class Test(unittest.TestCase):
             if nova_combinacao[0] != primeira_indice0 or\
                nova_combinacao[1] != primeira_indice1 or\
                nova_combinacao[4] != primeira_indice4:
-                descartaos_alterados = True
+                descartados_alterados = True
         self.assertTrue(descartados_alterados)
 
     def test_023_gera_combinacao_nok_indice_invalido(self):
