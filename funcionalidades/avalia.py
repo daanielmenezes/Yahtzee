@@ -24,8 +24,14 @@
 #             Se não possuir, a pontuação será zero.
 #  ‘chance’: Soma de todos os dados.
 #
-#--------------primeira versao: 03/05/20-----------------
+#--------------versao 1.0.0: 03/05/20-----------------
+#  Por: Bruno Coutinho
 #  -avalia_combinacao implementada e passando em todos os testes
+#
+#--------------versao 1.0.1: 04/05/20-----------------
+#  Por: Bruno Coutinho
+#  -avalia_combinacao agora utilizando a funcao obtem_nomes do modulo
+#categoria para inserir nomes das categorias na lista retornada
 #  
 #####################################################################
 

@@ -4,7 +4,8 @@
 #  Responsável por guardar os nomes e a descrição de todas as categorias
 #  e disponibilizá-las.
 # 
-#--------------primeira versao: 02/05/20-----------------
+#--------------versao 1.0.0: 02/05/20-----------------
+#  Por: Bruno Coutinho
 #  -rola() implementada e passando em todos os testes
 #  
 #####################################################################
