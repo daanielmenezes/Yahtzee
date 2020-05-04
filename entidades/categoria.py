@@ -50,7 +50,7 @@ categorias = [
         },
         {
         'nome':'fullhouse',
-        'descricao':'Uma dupla e uma tripla de valors diferentes.'
+        'descricao':'Uma dupla e uma tripla de valores diferentes.'
         },
         {
         'nome':'sequencia4',
@@ -86,7 +86,7 @@ def obtem_nomes():
 
 #########################################################
 #Obtem todas as categorias e suas descrições.
-#Retorna uma lista dicionários:
+#Retorna uma lista de dicionários:
 #########################################################
 
 def obtem_descricoes():
