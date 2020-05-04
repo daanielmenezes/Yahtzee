@@ -29,6 +29,8 @@
 #  
 #####################################################################
 
+from entidades import categoria
+
 __all__ = ['avalia_combinacao']
 
 ##funcoes auxiliares às funcoes de cada categoria:
@@ -140,22 +142,23 @@ def insere_retorno(lista_retornada, categoria, pontuacao):
 #####################################################################
 
 def avalia_combinacao(combinacao):
+
+    categorias = categoria.obtem_nomes()
     #funcoes_chamadas: lista de dicionarios indicando o nome das funcoes
     #correspondentes à avaliaçao de cada categoria junto com o nome da categoria
-    
-    funcoes_chamadas = [{'nome': avalia1, 'categoria': '1'},\
-                        {'nome': avalia2, 'categoria': '2'},\
-                        {'nome': avalia3, 'categoria': '3'},\
-                        {'nome': avalia4, 'categoria': '4'},\
-                        {'nome': avalia5, 'categoria': '5'},\
-                        {'nome': avalia6, 'categoria': '6'},\
-                        {'nome': avalia_tripla, 'categoria': 'tripla'},\
-                        {'nome': avalia_quadra, 'categoria': 'quadra'},\
-                        {'nome': avalia_fullhouse, 'categoria': 'fullhouse'},\
-                        {'nome': avalia_seq4, 'categoria': 'sequencia4'}, \
-                        {'nome': avalia_seq5, 'categoria': 'sequencia5'},\
-                        {'nome': avalia_yahtzee, 'categoria': 'yahtzee'},\
-                        {'nome': avalia_chance, 'categoria': 'chance'}]
+    funcoes_chamadas = [{'nome': avalia1, 'categoria': categorias[0]['nome']},\
+                        {'nome': avalia2, 'categoria': categorias[1]['nome']},\
+                        {'nome': avalia3, 'categoria': categorias[2]['nome']},\
+                        {'nome': avalia4, 'categoria': categorias[3]['nome']},\
+                        {'nome': avalia5, 'categoria': categorias[4]['nome']},\
+                        {'nome': avalia6, 'categoria': categorias[5]['nome']},\
+                        {'nome': avalia_tripla, 'categoria': categorias[6]['nome']},\
+                        {'nome': avalia_quadra, 'categoria': categorias[7]['nome']},\
+                        {'nome': avalia_fullhouse, 'categoria': categorias[8]['nome']},\
+                        {'nome': avalia_seq4, 'categoria': categorias[9]['nome']}, \
+                        {'nome': avalia_seq5, 'categoria': categorias[10]['nome']},\
+                        {'nome': avalia_yahtzee, 'categoria': categorias[11]['nome']},\
+                        {'nome': avalia_chance, 'categoria': categorias[12]['nome']}]
     retorno = []
     for funcao in funcoes_chamadas:
         pontuacao_retornada = funcao['nome'](combinacao)
