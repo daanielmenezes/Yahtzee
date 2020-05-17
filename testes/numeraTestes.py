@@ -4,8 +4,6 @@
 #  Le a ordem dos testes no arquivo ordem.txt.
 #  Escreve os testes numerados no arquivo testes.py  
 #  na raiz do projeto.                               
-#  So testei no linux, mas escrevi para funcionar no 
-#  windows tambem. Testar no windows quando possivel.
 #
 #####################################################
 
@@ -22,10 +20,11 @@ output.write("\nclass Test(unittest.TestCase):\n")
 
 i = 0
 testes = open(os.path.join(base, 'ordem.txt'), 'r')
+excluir = ["unittest", "import"]
 for teste in testes:
     teste = open(os.path.join(base, teste.strip()), 'r')
     for linha in teste:
-        if "unittest" not in linha:
+        if all( x not in linha for x in excluir ):
             if "def test" in linha:
                     i += 1
             linha = linha.replace("AAA", "%03d" % i)
