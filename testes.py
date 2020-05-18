@@ -131,7 +131,6 @@ class Test(unittest.TestCase):
         self.assertIn( {'nome':'chance', 'pontuacao':20}, retorno )
 
 
-#from entidades.combinacao import *
 
     
 ##########################
@@ -176,7 +175,6 @@ class Test(unittest.TestCase):
         self.assertEqual(retorno_esperado, 1)
 
 
-#from entidades.jogador import *
 
 ##########################
 #      TESTES JOGADOR:      
