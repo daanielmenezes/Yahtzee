@@ -1,6 +1,25 @@
-##########################################
-#  Script para a criação do banco de dados
-##########################################
+###############################################
+#
+#    Script para a criação do banco de dados
+# -----------------v1.0.0-------------------
+#    Por: Daniel Menezes
+#    Criadas as cofigurações das tabelas:
+#       - Partida
+#       - Jogador
+#       - Categoria
+#       - Jogador_Partida
+#       - Tabela
+#       - Tabela_Pontuacao
+#       
+#    Criada a verificação de banco de dados 
+#    já existente.
+#  
+#    Criado o loop para execução de cada
+#    comando de criação de tabelas.
+#  
+#    Criado input das credencias do mysql
+#  
+###############################################
 
 import mysql.connector
 from mysql.connector import errorcode
