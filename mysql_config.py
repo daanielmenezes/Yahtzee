@@ -51,9 +51,9 @@ tabelas['Jogador'] = (
         create table Jogador (
             nome varchar(255) not null,
             data_criacao date,
-            pontucao_total int,
-            colocacao int,
-            desistencia bool,
+            pontuacao_total int,
+            recorde int,
+            ranking int,
             primary key (nome)
         )
         """
@@ -76,7 +76,7 @@ tabelas['Tabela'] = (
         create table Tabela (
             data_horario datetime,
             nome_jogador varchar(255) not null,
-            pontucao_total int,
+            pontuacao_total int,
             colocacao int,
             desistencia bool,
             primary key (data_horario, nome_jogador),
