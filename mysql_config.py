@@ -1,4 +1,4 @@
-###############################################
+###################################################
 #
 #    Script para a criação do banco de dados
 # -----------------v1.0.0-------------------
@@ -19,7 +19,16 @@
 #  
 #    Criado input das credencias do mysql
 #  
-###############################################
+# -----------------v1.0.1-------------------
+#    Por: Daniel Menezes
+#    
+#    Removida a configuração da tabela Categoria,
+#    pois é hardcoded no módulo Categoria
+#
+#    Input de credenciais removido, sera assumido
+#    usuário 'root' com senha 'root'.
+###################################################
+
 
 import mysql.connector
 from mysql.connector import errorcode
@@ -45,16 +54,6 @@ tabelas['Jogador'] = (
             pontucao_total int,
             colocacao int,
             desistencia bool,
-            primary key (nome)
-        )
-        """
-        )
-
-tabelas['Categoria'] = (
-        """
-        create table Categoria (
-            nome varchar(255) not null,
-            descricao varchar(255),
             primary key (nome)
         )
         """
@@ -96,28 +95,27 @@ tabelas['Tabela_Pontuacao'] = (
             pontuacao int,
             primary key (data_horario, nome_jogador, nome_categoria),
             foreign key (data_horario) references Partida(data_horario),
-            foreign key (nome_jogador) references Jogador(nome),
-            foreign key (nome_categoria) references Categoria(nome) 
+            foreign key (nome_jogador) references Jogador(nome)
         )
         """
         )
 
 def cria_banco_de_dados(cursor):
     try:
+        print("Criando Banco de Dados Yahtzee: ", end = '')
         cursor.execute("CREATE DATABASE Yahtzee")
     except mysql.connector.Error as err:
         print("Falha ao criar banco de dados: {}".format(err))
         exit(1)
+    else:
+        print("OK.")
 
-
-usuario = input('Usuário MySql: ')
-senha = input('Senha: ')
 
 try:
     banco = mysql.connector.connect(
             host = 'localhost',
-            user = usuario,
-            passwd = senha
+            user = 'root',
+            passwd = 'root'
         )
     cursor = banco.cursor()
     cursor.execute("USE Yahtzee")
@@ -127,7 +125,6 @@ except mysql.connector.Error as err:
     elif err.errno == errorcode.ER_BAD_DB_ERROR:
         cria_banco_de_dados(cursor)
         cursor.execute("USE Yahtzee")
-        print("Banco de dados criado")
     else: 
         print(err)
         exit(1)
