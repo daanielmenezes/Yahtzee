@@ -1,6 +1,5 @@
 import unittest
-
-#from entidades.jogador import *
+from entidades.jogador import *
 
 class Testmock(unittest.TestCase):
 ##########################
@@ -65,7 +64,7 @@ class Testmock(unittest.TestCase):
 
     def test_AAA_atualiza_info_ok_atualiza_com_sucesso(self):
         print("Caso de Teste AAA - Verifica atualizacao")
-        info_joao = jogador.obtem_info('joao')[0]
+        info_joao = jogador.obtem_info(['joao'])[0]
         self.assertEqual((info_joao['pontuacao_total'],
                           info_joao['recorde']),(100,100))
 
