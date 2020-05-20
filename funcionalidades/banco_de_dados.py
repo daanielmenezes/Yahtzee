@@ -33,6 +33,7 @@ def abre_acesso():
                 host = 'localhost',
                 user = 'root',
                 passwd = 'root',
+                database = 'Yahtzee',
                 autocommit = True,
                 buffered = True
             )
