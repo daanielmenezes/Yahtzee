@@ -26,7 +26,7 @@ class Test(unittest.TestCase):
     def test_AAA_fecha_acesso_ok_condicao_retorno(self):
         print("Caso de Teste AAA - Fecha acesso Condição de retorno ok.")
         dic = banco_de_dados.abre_acesso()
-        retorno = banco_de_dados.fecha_acesso(dic['conexao'], dic['cursor'])
+        retorno = banco_de_dados.fecha_acesso(dic)
         self.assertEqual(retorno, 0)
 
 
@@ -35,7 +35,9 @@ class Test(unittest.TestCase):
 
     def test_AAA_fecha_acesso_nok_condicao_retorno_tipo_invalido(self):
         print("Caso de Teste AAA - Fecha acesso parâmetros inválidos.")
-        retorno = banco_de_dados.fecha_acesso(1, 'daniel')
+        retorno = banco_de_dados.fecha_acesso(
+                    {'conexao':1, 'cursor':'daniel'}
+                )
         self.assertEqual(retorno, 2)
 
 unittest.main()
