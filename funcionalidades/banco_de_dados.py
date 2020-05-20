@@ -46,6 +46,9 @@ def abre_acesso():
 #########################################################
 #  Fecha a conexão com o banco e o cursor
 #  
+#  conexao: uma conexão criada pela abre_acessor
+#  cursor: um cursor criado pela abre_acesso
+#
 #  Retorna 0 em caso de sucesso
 #  ou retorna 1 em caso de erro.
 #  ou retorna 2 caso conexao ou cursor sejam invalidos
