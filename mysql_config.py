@@ -27,6 +27,15 @@
 #
 #    Input de credenciais removido, sera assumido
 #    usuário 'root' com senha 'root'.
+# ------------------v1.1.0------------------
+#    Por: Daniel Menezes
+#    
+#    Caso já exista um banco de dados Yahtzee,
+#    o banco de dados será deletado e recriado
+#    para garantir que terá todas as configurações
+#    corretas.
+#
+#    Criação de tabelas separada em uma função 
 ###################################################
 
 
@@ -103,13 +112,30 @@ tabelas['Tabela_Pontuacao'] = (
 def cria_banco_de_dados(cursor):
     try:
         print("Criando Banco de Dados Yahtzee: ", end = '')
+        cursor.execute("DROP DATABASE IF EXISTS Yahtzee")
         cursor.execute("CREATE DATABASE Yahtzee")
+        cursor.execute("USE Yahtzee")
     except mysql.connector.Error as err:
         print("Falha ao criar banco de dados: {}".format(err))
         exit(1)
     else:
         print("OK.")
+    return
 
+def cria_tabelas(cursor):
+    for tabela in tabelas:
+        sql = tabelas[tabela]
+        try:
+            print("Criando tabela {}: ".format(tabela), end='')
+            cursor.execute(sql)
+        except mysql.connector.Error as err:
+            if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
+                print("já existe.")
+            else:
+                print(err.msg)
+        else:
+            print("OK.")
+    return
 
 try:
     banco = mysql.connector.connect(
@@ -118,29 +144,14 @@ try:
             passwd = 'root'
         )
     cursor = banco.cursor()
-    cursor.execute("USE Yahtzee")
 except mysql.connector.Error as err:
     if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
         print("Credenciais inválidas ou sem privilégios")
-    elif err.errno == errorcode.ER_BAD_DB_ERROR:
-        cria_banco_de_dados(cursor)
-        cursor.execute("USE Yahtzee")
     else: 
         print(err)
         exit(1)
-
-for tabela in tabelas:
-    sql = tabelas[tabela]
-    try:
-        print("Criando tabela {}: ".format(tabela), end='')
-        cursor.execute(sql)
-    except mysql.connector.Error as err:
-        if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
-            print("já existe.")
-        else:
-            print(err.msg)
-    else:
-        print("OK.")
-
-cursor.close()
-banco.close()
+else:
+    cria_banco_de_dados(cursor)
+    cria_tabelas(cursor)
+    cursor.close()
+    banco.close()
