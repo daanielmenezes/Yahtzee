@@ -1,7 +1,8 @@
+import mysql.connector
 import unittest
+from datetime import datetime
 from entidades import *
 from funcionalidades import *
-import mysql.connector
 
 class Test(unittest.TestCase):
 
@@ -19,8 +20,7 @@ class Test(unittest.TestCase):
     #Não é possível testar o erro de conexão em teste de caixa fechada
 
     def test_002_abre_acesso_ok_condicao_retorno(self):
-        print("Caso de Teste 002 - Abre acesso Condição de retorno tipos"+
-                " corretos.")
+        print("Caso de Teste 002 - Abre acesso tipos corretos.")
         retorno = banco_de_dados.abre_acesso()
         self.assertTrue( isinstance(retorno['conexao'],
                          mysql.connector.connection.MySQLConnection)
@@ -319,34 +319,34 @@ class Test(unittest.TestCase):
     def test_043_cria_tabela_ok_condicao_retorno(self):
         print("Caso de Teste 043 - Cria tabela com sucesso")
         jogador.insere('eduardo')
-        retorno_esperado = tabela.cria_tabela('eduardo','25:04:20:17:00:00')
+        retorno_esperado = tabela.cria_tabela('eduardo',datetime(2020,4,25,17))
         self.assertEqual(retorno_esperado, 0)
 
     def test_044_cria_tabela_ok_criada_com_sucesso(self):
         print("Caso de Teste 044 - Verifica criacao de tabela")
-        temp = tabela.obtem_tabelas(['eduardo'], ['25:04:20:17:00:00'])
+        temp = tabela.obtem_tabelas(['eduardo'], [datetime(2020,4,25,17)])
         self.assertEqual((temp[0]['nome_jogador'],
                           temp[0]['data_horario_partida'],
                           temp[0]['pontuacao_total']),
-                         ('eduardo','25:04:20:17:00:00',0))
+                         ('eduardo',datetime(2020,4,25,17),0))
 
     def test_045_cria_tabela_nok_nome_inexistente(self):
         print("Caso de Teste 045 - Impede criacao de tabela caso" +
               " nao exista jogador com nome fornecido")
-        retorno_esperado = tabela.cria_tabela('norma', '25:04:20:17:00:00')
+        retorno_esperado = tabela.cria_tabela('norma', datetime(2020,4,25,17))
         self.assertEqual(retorno_esperado, 1)
 
     def test_046_cria_tabela_nok_tabela_ja_existente(self):
         print("Caso de Teste 046 - Impede criacao de tabela caso" + 
               " jogador já possua tabela na partida")
-        retorno_esperado = tabela.cria_tabela('eduardo','25:04:20:17:00:00')
+        retorno_esperado = tabela.cria_tabela('eduardo',datetime(2020,4,25,17))
         self.assertEqual(retorno_esperado, 2)
 
     def test_047_insere_pontuacao_ok_condicao_retorno(self):
         print("Caso de Teste 047 - Insere pontuacao com sucesso")
         categ = categoria.obtem_nomes() 
         categ = categ[0]['nome'] #pega o nome da primeira categoria
-        retorno_esperado = tabela.insere_pontuacao('eduardo','25:04:20:17:00:00',
+        retorno_esperado = tabela.insere_pontuacao('eduardo',datetime(2020,4,25,17),
                                                    categ,30)
         self.assertEqual(retorno_esperado, 0)
 
@@ -354,7 +354,7 @@ class Test(unittest.TestCase):
         print("Caso de Teste 048 - Verifica insercao")
         categ = categoria.obtem_nomes() 
         categ = categ[0]['nome'] #pega o nome da primeira categoria
-        temp = tabela.obtem_tabelas(['eduardo'], ['25:04:20:17:00:00'])
+        temp = tabela.obtem_tabelas(['eduardo'], [datetime(2020,4,25,17)])
         temp = temp[0]['pontos_por_categoria'] #pontos por categoria do eduardo
         pontos_categ = next(pontos for pontos in temp if pontos['nome']==categ)
         self.assertEqual(pontos_categ['pontuacao'], 30)
@@ -363,7 +363,7 @@ class Test(unittest.TestCase):
         print("Caso de Teste 049 - Nao insere se a tabela informada nao existir")
         categ = categoria.obtem_nomes() 
         categ = categ[0]['nome'] #pega o nome da primeira categoria
-        retorno_esperado = tabela.insere_pontuacao('karla','25:04:20:17:00:00',
+        retorno_esperado = tabela.insere_pontuacao('karla',datetime(2020,4,25,17),
                                                    categ, 30)
         self.assertEqual(retorno_esperado, 1)
 
@@ -371,7 +371,7 @@ class Test(unittest.TestCase):
         print("Caso de Teste 050 - Nao insere se a" +
               " categoria informada nao existir")
         retorno_esperado = tabela.insere_pontuacao('eduardo',
-                                                   '25:04:20:17:00:00',
+                                                   datetime(2020,4,25,17),
                                                    'categ_falsa', 30)
         self.assertEqual(retorno_esperado, 2)
 
@@ -380,7 +380,7 @@ class Test(unittest.TestCase):
               " pontos for negativa")
         categ = categoria.obtem_nomes() 
         categ = categ[0]['nome'] #pega o nome da primeira categoria
-        retorno_esperado = tabela.insere_pontuacao('eduardo','25:04:20:17:00:00',
+        retorno_esperado = tabela.insere_pontuacao('eduardo',datetime(2020,4,25,17),
                                                    categ, -30)
         self.assertEqual(retorno_esperado, 3)
 
@@ -389,23 +389,23 @@ class Test(unittest.TestCase):
               " o jogador ja marcou pontos na categoria informada")
         categ = categoria.obtem_nomes() 
         categ = categ[0]['nome'] #pega o nome da primeira categoria
-        retorno_esperado = tabela.insere_pontuacao('eduardo','25:04:20:17:00:00',
+        retorno_esperado = tabela.insere_pontuacao('eduardo',datetime(2020,4,25,17),
                                                    categ, 30)
         self.assertEqual(retorno_esperado, 4)
 
     def test_053_registra_desistencia_ok_condicao_retorno(self):
         print("Caso de Teste 053 - registra desistencia com sucesso")
         jogador.insere('jorge')
-        tabela.cria_tabela('jorge','25:04:20:17:00:00')
+        tabela.cria_tabela('jorge',datetime(2020,4,25,17))
         retorno_esperado = tabela.registra_desistencia('jorge',
-                                                       '25:04:20:17:00:00')
+                                                       datetime(2020,4,25,17))
         self.assertEqual(retorno_esperado, 0)
 
     def test_054_registra_desistencia_ok_zera_nao_pontuadas(self):
         print("Caso de Teste 054 - Verifica se categorias nao pontuadas" +
               " foram zeradas ao desistir")
         zeradas = True
-        temp = tabela.obtem_tabelas(['jorge'],['25:04:20:17:00:00'])
+        temp = tabela.obtem_tabelas(['jorge'],[datetime(2020,4,25,17)])
         pontos_categ = temp[0]['pontos_por_categoria']
         for categ in pontos_categ:
             if categ['pontuacao']!=0:
@@ -414,7 +414,7 @@ class Test(unittest.TestCase):
 
     def test_055_registra_desistencia_ok_desiste_com_sucesso(self):
         print("Caso de Teste 055 - Verifica desistencia")
-        temp = tabela.obtem_tabelas(['jorge'], ['25:04:20:17:00:00'])
+        temp = tabela.obtem_tabelas(['jorge'], [datetime(2020,4,25,17)])
         confere_desistiu = temp[0]['desistencia']
         self.assertTrue(confere_desistiu)
 
@@ -422,7 +422,7 @@ class Test(unittest.TestCase):
         print("Caso de Teste 056 - impede desistencia caso tabela" +
               " do jogador na partida nao exista")
         retorno_esperado = tabela.registra_desistencia('karla',
-                                                       '25:04:20:17:00:00')
+                                                       datetime(2020,4,25,17))
         self.assertEqual(retorno_esperado, 1)
 
     def test_057_registra_desistencia_nok_todas_categorias_pontuadas(self):
@@ -431,57 +431,57 @@ class Test(unittest.TestCase):
         categorias = categoria.obtem_nomes()
         for categ in categorias[1:]:  
             nome_cat = categ['nome']
-            tabela.insere_pontuacao('eduardo','25:04:20:17:00:00',
+            tabela.insere_pontuacao('eduardo',datetime(2020,4,25,17),
                                                    nome_cat,30)
         retorno_esperado = tabela.registra_desistencia('eduardo',
-                                                       '25:04:20:17:00:00')
+                                                       datetime(2020,4,25,17))
         self.assertEqual(retorno_esperado, 2)
 
     def test_058_obtem_tabelas_ok(self):
         print("Caso de Teste 058 - Obter tabelas de jogadores nas partidas")
-        temp = tabela.obtem_tabelas(['eduardo'],['25:04:20:17:00:00'])
+        temp = tabela.obtem_tabelas(['eduardo'],[datetime(2020,4,25,17)])
         n_categorias = len(categorias.obtem_nomes())
         self.assertEqual((temp[0]['nome_jogador'],
                           temp[0]['data_horario_partida'],
                           temp[0]['pontuacao_total'],
                           temp[0]['desistencia']),
-                         ('eduardo','25:04:20:17:00:00',30 * n_categorias,True))
+                         ('eduardo',datetime(2020,4,25,17),30 * n_categorias,True))
 
     def test_059_obtem_tabelas_ok_colocacoes_corretas(self):
         print("Caso de Teste 059 - Tabelas calculam colocacoes corretamente")
-        tab_ed = tabela.obtem_tabelas(['eduardo'],['25:04:20:17:00:00'])
-        tab_jorge = tabela.obtem_tabelas(['jorge'],['25:04:20:17:00:00'])
+        tab_ed = tabela.obtem_tabelas(['eduardo'],[datetime(2020,4,25,17)])
+        tab_jorge = tabela.obtem_tabelas(['jorge'],[datetime(2020,4,25,17)])
         self.assertEqual((tab_ed[0]['colocacao'], tab_jorge[0]['colocacao']),
                          (1,2))
         
     def test_060_obtem_tabelas_nok_nome_invalido(self):
         print("Caso de Teste 060 - obtem_info retorna 1"
               + " se a lista de nomes possuir um nome invalido")
-        retorno_esperado = tabela.obtem_tabelas(['pedro'],['25:04:20:17:00:00'])
+        retorno_esperado = tabela.obtem_tabelas(['pedro'],[datetime(2020,4,25,17)])
         self.assertEqual(retorno_esperado, 1)
 
     def test_061_obtem_tabelas_nok_data_horario_invalido(self):
         print("Caso de Teste 061 - obtem_info retorna 2"
               + " se a lista de data_horario possuir um data_horario invalido")
-        retorno_esperado = tabela.obtem_tabelas(['eduardo'],['25:04:19:17:00:00'])
+        retorno_esperado = tabela.obtem_tabelas(['eduardo'],[datetime(2019,4,25,17)])
         self.assertEqual(retorno_esperado, 2)
         
     def test_062_remove_ok_condicao_retorno(self):
         print("Caso de Teste 062 - remove tabela de um jogador" +
               " em uma partida com sucesso")
-        retorno_esperado = tabela.remove('eduardo','25:04:20:17:00:00')
+        retorno_esperado = tabela.remove('eduardo',datetime(2020,4,25,17))
         self.assertEqual(retorno_esperado, 0)
 
     def test_063_remove_ok_retira_com_sucesso(self):
         print("Caso de Teste 063 - Verifica remocao")
         retorno_esperado = tabela.obtem_tabelas(['eduardo'],
-                                                ['25:04:20:17:00:00'])
+                                                [datetime(2020,4,25,17)])
         self.assertEqual(retorno_esperado, [])
 
     def test_064_remove_nok_tabela_nao_existe(self):
         print("Caso de Teste 064 - impede remocao caso tabela" +
               "do jogador na partida nao exista")
-        retorno_esperado = tabela.remove('eduardo','25:04:20:17:00:00')
+        retorno_esperado = tabela.remove('eduardo',datetime(2020,4,25,17))
         self.assertEqual(retorno_esperado, 1)
 
 
@@ -520,7 +520,7 @@ class Test(unittest.TestCase):
         jogador.insere("lucas")
         jogador.insere("julia")
         retorno = partida.inicia_partida(["flavio", "lucas", "julia"])
-        self.assertIs( type(retorno), str )
+        self.assertIsInstance(retorno, datetime)
    
     def test_066_inicia_partida_nok_jogador_nao_existente(self):
         print("Caso de Teste 066 - Inicia partida nao aceita jogador"+
@@ -536,7 +536,7 @@ class Test(unittest.TestCase):
         self.assertEqual(retorno,0)
 
     def test_068_faz_lancamento_ok_combinacao_gerada_com_sucesso(self):
-        print("Caso de Teste 068 - Faz lancamento em nova partida sucesso.")
+        print("Caso de Teste 068 - Faz lancamento combinação gerada.")
         data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
         info = partida.obtem_info_partida([data_horario], [])
         combinacao = info['combinacao_atual']
@@ -547,7 +547,7 @@ class Test(unittest.TestCase):
     def test_069_faz_lancamento_nok_partida_inexistente(self):
         print("Caso de Teste 069 - Erro em fazer lancamento em partida"+
                 " inexistente.")
-        retorno = partida.faz_lancamento("11:01:00:12:23:11",[])
+        retorno = partida.faz_lancamento(datetime(2000, 1, 11, 12, 21, 11, 0),[])
         self.assertEqual( retorno, 1 )
 
     def test_070_pausa_partida_ok(self):
@@ -615,7 +615,7 @@ class Test(unittest.TestCase):
     def test_078_marca_pontuacao_nok_partida_inexistente(self):
         print("Caso de Teste 078 - Erro ao marcar pontuacao em partida"+
                 " inexistente.")
-        retorno = partida.marca_pontuacao("11:01:00:10:21:41", 'chance')
+        retorno = partida.marca_pontuacao(datetime(2000,1,11,10,21,41,1320), 'chance')
         self.assertEqual( retorno, 1 )
 
     def test_079_marca_pontuacao_nok_partida_pausada(self):
@@ -664,7 +664,7 @@ class Test(unittest.TestCase):
         
     def test_084_pausa_partida_nok_partida_inexistente(self):
         print("Caso de Teste 084 - Erro ao pausar uma partida inexistente.")
-        retorno = partida.pausa_partida("11:01:00:10:21:41")
+        retorno = partida.pausa_partida(datetime(2000, 1, 11, 12, 21, 41, 0))
         self.assertEqual(retorno, 1)
 
     def test_085_pausa_partida_nok_partida_pausada(self):
@@ -687,7 +687,7 @@ class Test(unittest.TestCase):
 
     def test_088_partida_desiste_nok_partida_inexistente(self):
         print("Caso de Teste 088 - Erro ao desistir em uma partida inexistente.")
-        retorno = partida.desiste("11:01:00:10:21:41", 'flavio')
+        retorno = partida.desiste(datetime(2000, 1, 11, 12, 21, 11, 0), 'flavio')
         self.assertEqual( retorno, 1 )
 
     def test_089_partida_desiste_nok_partida_pausada(self):
@@ -780,7 +780,7 @@ class Test(unittest.TestCase):
 
     def test_102_obtem_info_partida_nok_lista_vazia(self):
         print("Caso de Teste 102 - Obtem info retorna lista vazia se nao achar.")
-        info_partida = partida.obtem_info_partida(["11:01:00:10:21:41"], [])[0]
+        info_partida = partida.obtem_info_partida([datetime(2000, 1, 11, 12, 21, 11, 0)], [])[0]
         assertEqual(info_partida, [] )
 
 unittest.main()
