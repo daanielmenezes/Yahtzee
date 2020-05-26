@@ -16,8 +16,8 @@
 #  Por: Daniel Menezes
 #  
 #  Funcionalidade de configuração inicial 
-#  do banco de dados movido do script de
-#  configuração para cá como uma função.
+#  do banco de dados transferido para este
+#  módulo na função "configura".
 #
 ###########################################
 
