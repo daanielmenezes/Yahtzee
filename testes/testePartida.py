@@ -1,4 +1,5 @@
 import unittest
+from entidades import tabela
 
 class Testmock(unittest.TestCase):
 ##########################
@@ -35,7 +36,7 @@ class Testmock(unittest.TestCase):
         jogador.insere("lucas")
         jogador.insere("julia")
         retorno = partida.inicia_partida(["flavio", "lucas", "julia"])
-        self.assertIs( type(retorno), str )
+        self.assertIsInstance(retorno, datetime)
    
     def test_AAA_inicia_partida_nok_jogador_nao_existente(self):
         print("Caso de Teste AAA - Inicia partida nao aceita jogador"+
@@ -62,7 +63,7 @@ class Testmock(unittest.TestCase):
     def test_AAA_faz_lancamento_nok_partida_inexistente(self):
         print("Caso de Teste AAA - Erro em fazer lancamento em partida"+
                 " inexistente.")
-        retorno = partida.faz_lancamento("11:01:00:12:23:11",[])
+        retorno = partida.faz_lancamento(datetime(2000, 1, 11, 12, 21, 11, 0),[])
         self.assertEqual( retorno, 1 )
 
     def test_AAA_pausa_partida_ok(self):
@@ -130,7 +131,7 @@ class Testmock(unittest.TestCase):
     def test_AAA_marca_pontuacao_nok_partida_inexistente(self):
         print("Caso de Teste AAA - Erro ao marcar pontuacao em partida"+
                 " inexistente.")
-        retorno = partida.marca_pontuacao("11:01:00:10:21:41", 'chance')
+        retorno = partida.marca_pontuacao(datetime(2000,1,11,10,21,41,1320), 'chance')
         self.assertEqual( retorno, 1 )
 
     def test_AAA_marca_pontuacao_nok_partida_pausada(self):
@@ -179,7 +180,7 @@ class Testmock(unittest.TestCase):
         
     def test_AAA_pausa_partida_nok_partida_inexistente(self):
         print("Caso de Teste AAA - Erro ao pausar uma partida inexistente.")
-        retorno = partida.pausa_partida("11:01:00:10:21:41")
+        retorno = partida.pausa_partida(datetime(2000, 1, 11, 12, 21, 41, 0))
         self.assertEqual(retorno, 1)
 
     def test_AAA_pausa_partida_nok_partida_pausada(self):
@@ -202,7 +203,7 @@ class Testmock(unittest.TestCase):
 
     def test_AAA_partida_desiste_nok_partida_inexistente(self):
         print("Caso de Teste AAA - Erro ao desistir em uma partida inexistente.")
-        retorno = partida.desiste("11:01:00:10:21:41", 'flavio')
+        retorno = partida.desiste(datetime(2000, 1, 11, 12, 21, 11, 0), 'flavio')
         self.assertEqual( retorno, 1 )
 
     def test_AAA_partida_desiste_nok_partida_pausada(self):
@@ -295,7 +296,7 @@ class Testmock(unittest.TestCase):
 
     def test_AAA_obtem_info_partida_nok_lista_vazia(self):
         print("Caso de Teste AAA - Obtem info retorna lista vazia se nao achar.")
-        info_partida = partida.obtem_info_partida(["11:01:00:10:21:41"], [])[0]
+        info_partida = partida.obtem_info_partida([datetime(2000, 1, 11, 12, 21, 11, 0)], [])[0]
         assertEqual(info_partida, [] )
 
 unittest.main()

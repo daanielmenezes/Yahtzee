@@ -13,10 +13,11 @@ import os
 base = os.path.dirname(__file__)
 output = open(os.path.join( base, os.pardir, 'testes.py'), 'w')
 
+output.write( "import mysql.connector\n" )
 output.write( "import unittest\n" )
+output.write( "from datetime import datetime\n" )
 output.write( "from entidades import *\n" )
 output.write( "from funcionalidades import *\n" )
-output.write( "import mysql.connector\n" )
 output.write("\nclass Test(unittest.TestCase):\n")
 
 i = 0
