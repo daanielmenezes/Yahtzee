@@ -51,7 +51,7 @@ class Testmock(unittest.TestCase):
         self.assertEqual(retorno,0)
 
     def test_AAA_faz_lancamento_ok_combinacao_gerada_com_sucesso(self):
-        print("Caso de Teste AAA - Faz lancamento em nova partida sucesso.")
+        print("Caso de Teste AAA - Faz lancamento combinação gerada.")
         data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
         info = partida.obtem_info_partida([data_horario], [])
         combinacao = info['combinacao_atual']
