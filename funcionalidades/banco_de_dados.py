@@ -52,18 +52,6 @@ tabelas['Jogador'] = (
         """
         )
 
-tabelas['Jogador_Partida'] = (
-        """
-        create table Jogador_Partida(
-            data_horario datetime,
-            nome varchar(255) not null,
-            primary key (data_horario, nome),
-            foreign key (data_horario) references Partida(data_horario),
-            foreign key (nome) references Jogador(nome)
-        )
-        """
-        )
-
 tabelas['Tabela'] = (
         """
         create table Tabela (
