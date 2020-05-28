@@ -1,22 +1,28 @@
-#####################################################################
+#######################################################################
 # MODULO PARTIDA
 #
-#  Centraliza as ações relacionadas ao andamento de uma partida
-#  fazendo a comunicação entre os diversos módulos envolvidos. Cada 
-#  partida possui um atributo identificador “data_horario”, trata-se 
-#  do tipo datetime do python, indicando a data e horário em que foi 
-#  criada. Uma partida pode ter status “andamento”, “pausada” ou 
-#  “encerrada”.
+#  Centraliza as ações relacionadas ao andamento de uma partida fazendo
+#  a comunicação entre os diversos módulos envolvidos. Cada partida 
+#  possui um atributo identificador “data_horario”, trata-se do tipo 
+#  datetime do python, indicando a data e horário em que foi criada. 
+#   Uma partida pode ter status “andamento”, “pausada” ou “encerrada”.
+#  Somente uma partida poderá estar em andamento ao mesmo tempo. As 
+#  partidas são armazenadas no banco de dados apenas para registrar um
+#  histórico. Portanto, não é possível recuperar uma partida pausada 
+#  pelo banco de dados, para isso, é necessário salvar o estado da 
+#  partida em um arquivo XML.
 #
-#  Responsável por gerar combinações de 5 dados e a sua avaliação
-#  em pontos em cada categoria.
-#
-#--------------v0.1.0: 25/05/0020--------------------
+#---------------------------v0.1.0: 25/05/2020-------------------------
 #  Por: Daniel Menezes
 #  Criado mocking para tabela.cria_tabela
 #  Implementada inicia_partida passando nos testes
 #
-#####################################################################
+#---------------------------v0.2.0: 27/05/2020-------------------------
+#  Por: Daniel Menezes
+#  Modificada inicia_partida. Agora se recusa a iniciar uma partida
+#  caso já haja uma partida em andamento. Passando nos novos testes.
+#
+#######################################################################
 
 from datetime import datetime
 from entidades import jogador
@@ -33,7 +39,7 @@ partida_atual = {}
 
 #MOCKS:
 tabela = mock.Mock()
-tabela.cria_tabela.side_effect = [0, 0, 0, 1]
+tabela.cria_tabela.side_effect = [1, 0, 0, 0]
 
 
 
@@ -43,10 +49,12 @@ tabela.cria_tabela.side_effect = [0, 0, 0, 1]
 #
 # retorna data_horario da partida criada em caso de sucesso
 # ou retorna 1 caso um dos jogadores passados não exista.
+# ou retorna 2 caso já haja uma partida em andamento.
 #################################################################
 def inicia_partida(nomes):
+    if (partida_atual):
+        return 2
     data_horario = datetime.now()
-
     for jogador in nomes:
         cod_retorno = tabela.cria_tabela(jogador, data_horario) 
         if cod_retorno == 1:
@@ -59,14 +67,12 @@ def inicia_partida(nomes):
 
     banco = banco_de_dados.abre_acesso()
     sql_partida = """INSERT Partida VALUES (%s, %s)"""
-
     banco['cursor'].execute(sql_partida, (data_horario, 'andamento'))
-
     banco_de_dados.fecha_acesso(banco)
 
     partida_atual['data_horario'] = data_horario
-    partida_atual['combinacao_atual'] = [6,6,6,6,6]
-    partida_atual['turno_atual'] = 0
+    partida_atual['combinacao'] = [6,6,6,6,6]
+    partida_atual['turno'] = 0
     partida_atual['tentativas'] = 0
     partida_atual['jogadores'] = nomes
     partida_atual['jogador_da_vez'] = nomes[0]

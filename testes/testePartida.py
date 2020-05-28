@@ -30,6 +30,12 @@ class Testmock(unittest.TestCase):
 #A partida do eleanor sera pausada
 #A partida do hugo sera encerrada
 
+    def test_AAA_inicia_partida_nok_jogador_nao_existente(self):
+        print("Caso de Teste AAA - Inicia partida nao aceita jogador"+
+            " inexistente.")
+        retorno = partida.inicia_partida(["juan"])
+        self.assertEqual( retorno , 1 )
+
     def test_AAA_inicia_partida_ok(self):
         print("Caso de Teste AAA - Inicia partida com sucesso.")
         jogador.insere("flavio")
@@ -37,18 +43,18 @@ class Testmock(unittest.TestCase):
         jogador.insere("julia")
         retorno = partida.inicia_partida(["flavio", "lucas", "julia"])
         self.assertIsInstance(retorno, datetime)
+        self.partidaFlavio = retorno
    
-    def test_AAA_inicia_partida_nok_jogador_nao_existente(self):
-        print("Caso de Teste AAA - Inicia partida nao aceita jogador"+
-            " inexistente.")
-        retorno = partida.inicia_partida(["juan"])
-        self.assertEqual( retorno , 1 )
+    def test_AAA_inicia_partida_nok_partida_em_andamento(self):
+        print("Caso de Teste AAA - Inicia partida recusa iniciar partida"+
+                "com outra partida em andamento.")
+        retorno = partida.inicia_partida(["lucas"])
+        self.assertEqual( retorno , 2 )
 
     def test_AAA_faz_lancamento_ok(self):
-        print("Caso de Teste AAA - Faz lancamento em nova partida sucesso.")
-        jogador.insere("eleanor")
-        data_horario = partida.inicia_partida(["eleanor"])
-        retorno = partida.faz_lancamento(data_horario,[])
+        print("Caso de Teste AAA - Faz lancamento em partida com sucesso.")
+        data_horario = self.partidaFlavio
+        retorno = partida.faz_lancamento(data_horario, [])
         self.assertEqual(retorno,0)
 
     def test_AAA_faz_lancamento_ok_combinacao_gerada_com_sucesso(self):
