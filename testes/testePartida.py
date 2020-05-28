@@ -36,6 +36,12 @@ class Testmock(unittest.TestCase):
         retorno = partida.inicia_partida(["juan"])
         self.assertEqual( retorno , 1 )
 
+    def test_AAA_faz_lancamento_nok_partida_inexistente(self):
+        print("Caso de Teste AAA - Erro em fazer lancamento em partida"+
+                " inexistente.")
+        retorno = partida.faz_lancamento([1,2])
+        self.assertEqual( retorno, 1 )
+        
     def test_AAA_inicia_partida_ok(self):
         print("Caso de Teste AAA - Inicia partida com sucesso.")
         jogador.insere("flavio")
@@ -47,30 +53,43 @@ class Testmock(unittest.TestCase):
    
     def test_AAA_inicia_partida_nok_partida_em_andamento(self):
         print("Caso de Teste AAA - Inicia partida recusa iniciar partida"+
-                "com outra partida em andamento.")
+                " com outra partida em andamento.")
         retorno = partida.inicia_partida(["lucas"])
         self.assertEqual( retorno , 2 )
 
+    def test_AAA_faz_lancamento_nok_indice_invalido(self):
+        print("Caso de Teste AAA - Erro em fazer lancamento com indices de "+
+                "dados invalidos.")
+        retorno = partida.faz_lancamento([-1,5])
+        self.assertEqual(retorno, 2)
+
+    def test_AAA_faz_lancamento_nok_indice_primeiro_lancamento_indice(self):
+        print("Caso de Teste AAA - Erro em fazer primeiro lancamento do turno"+
+                " com indices de dados escolhidos.")
+        retorno = partida.faz_lancamento([1,3])
+        self.assertEqual(retorno, 3)
+
     def test_AAA_faz_lancamento_ok(self):
         print("Caso de Teste AAA - Faz lancamento em partida com sucesso.")
-        data_horario = self.partidaFlavio
-        retorno = partida.faz_lancamento(data_horario, [])
-        self.assertEqual(retorno,0)
+        retorno = partida.faz_lancamento([])
+        self.assertEqual(retorno, 0)
+
+    def test_AAA_faz_lancamento_nok_tentativas_esgotadas(self):
+        print("Caso de Teste AAA - Faz lancamento erro quando o jogador já"+
+                " esgotou suas tentativas.")
+        partida.faz_lancamento([])
+        partida.faz_lancamento([])
+        retorno = partida.faz_lancamento([])
+        self.assertEqual(retorno, 4)
 
     def test_AAA_faz_lancamento_ok_combinacao_gerada_com_sucesso(self):
         print("Caso de Teste AAA - Faz lancamento combinação gerada.")
-        data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
-        info = partida.obtem_info_partida([data_horario], [])
-        combinacao = info['combinacao_atual']
-        dados = ([ dadoNum for dadoNum in combinacao if 1 <= dadoNum <= 6])
+        info = partida.obtem_info_partida()
+        combinacao = info['combinacao']
+        dados = ([ dadoNum for dadoNum in combinacao if dadoNum in range(1,7)])
         #confere que tem 5 numeros [1,6] na lista retornada
-        self.assertTrue( len(dados) == 5 )  
+        self.assertEqual( len(dados), 5 )  
         
-    def test_AAA_faz_lancamento_nok_partida_inexistente(self):
-        print("Caso de Teste AAA - Erro em fazer lancamento em partida"+
-                " inexistente.")
-        retorno = partida.faz_lancamento(datetime(2000, 1, 11, 12, 21, 11, 0),[])
-        self.assertEqual( retorno, 1 )
 
     def test_AAA_pausa_partida_ok(self):
         print("Caso de Teste AAA - Partida pausada com sucesso.")
@@ -83,13 +102,6 @@ class Testmock(unittest.TestCase):
         data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
         status = partida.obtem_info_partida([data_horario], [])['status']
         assertEqual(status, 'pausada') 
-
-    def test_AAA_faz_lancamento_nok_partida_pausada(self):
-        print("Caso de Teste AAA - Erro em fazer lancamento em partida"+
-                " pausada.")
-        data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
-        retorno = partida.faz_lancamento(data_horario,[])
-        self.assertEqual( retorno, 2 )
 
     def test_AAA_marca_pontuacao_ok_sucesso(self):
         print("Caso de Teste AAA - Marca pontuacao em uma categoria com"+
@@ -106,33 +118,6 @@ class Testmock(unittest.TestCase):
         chance = next(cat for cat in pts_cat if cat['nome'] == 'chance')[0] 
         self.assertGreater( chance['pontuacao'], 0 )
 
-    def test_AAA_faz_lancamento_nok_partida_encerrada(self):
-        print("Caso de Teste AAA - Erro em fazer lancamento em partida"+
-                " encerrada.")
-        jogador.insere("hugo")
-        data_horario = partida.inicia_partida(["hugo"])
-        for categoria in categoria.obtem_nomes():
-            #encerra uma partida marcando todas as categorias
-            partida.faz_lancamento(data_horario,[])
-            partida.marca_pontuacao(data_horario, categoria['nome'])
-        retorno = partida.faz_lancamento(data_horario,[])
-        self.assertEqual(retorno, 3)
-
-    def test_AAA_faz_lancamento_nok_indice_invalido(self):
-        print("Caso de Teste AAA - Erro em fazer lancamento com indices de "+
-                "dados invalidos.")
-        data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
-        retorno = partida.faz_lancamento(data_horario, [-1,5])
-        #turno do lucas
-        self.assertEqual(retorno, 4)
-
-    def test_AAA_faz_lancamento_nok_indice_primeiro_lancamento_indice(self):
-        print("Caso de Teste AAA - Erro em fazer primeiro lancamento do turno"+
-                " com indices de dados escolhidos.")
-        data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
-        retorno = partida.faz_lancamento(data_horario, [1,3])
-        #turno do lucas
-        self.assertEqual(retorno, 5)
 
     def test_AAA_marca_pontuacao_nok_partida_inexistente(self):
         print("Caso de Teste AAA - Erro ao marcar pontuacao em partida"+

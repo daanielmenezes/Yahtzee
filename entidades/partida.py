@@ -22,8 +22,12 @@
 #  Modificada inicia_partida. Agora se recusa a iniciar uma partida
 #  caso já haja uma partida em andamento. Passando nos novos testes.
 #
+#---------------------------v0.3.0: 27/05/2020-------------------------
+#  Por: Daniel Menezes
+#  Implementada faz_lancamento. Passando nos testes.
 #######################################################################
 
+from random import shuffle
 from datetime import datetime
 from entidades import jogador
 from entidades import tabela
@@ -32,7 +36,7 @@ from funcionalidades import combinacao
 
 from unittest import mock
 
-__all__ = ['inicia_partida',]
+__all__ = ['inicia_partida', 'faz_lancamento']
 
 
 partida_atual = {}
@@ -70,33 +74,51 @@ def inicia_partida(nomes):
     banco['cursor'].execute(sql_partida, (data_horario, 'andamento'))
     banco_de_dados.fecha_acesso(banco)
 
+    shuffle(nomes)
     partida_atual['data_horario'] = data_horario
-    partida_atual['combinacao'] = [6,6,6,6,6]
-    partida_atual['turno'] = 0
-    partida_atual['tentativas'] = 0
+    partida_atual['combinacao'] = None
+    partida_atual['pts_combincao'] = None
+    partida_atual['turno'] = 1
+    partida_atual['tentativas'] = 3
     partida_atual['jogadores'] = nomes
     partida_atual['jogador_da_vez'] = nomes[0]
     partida_atual['status'] = 'andamento'
 
     return data_horario 
 
-##########################################################################
-# Gera um novo lançamento para o jogador do turno
-# data_horario: identificador da partida
-# dados_escolhidos: lista com os índices (inteiros no intervalo [0,4])
-#  dos dados a terem seus valores mantidos
-#  ou lista vazia para rolar todos os dados
-# Retorna 0 em caso de sucesso
-#  ou retorna 1 caso a partida informada não exista
-#  ou retorna 2 caso a partida esteja pausada
-#  ou retorna 3 caso a partida esteja encerrada
-#  ou retorna 4 caso um dos índices em dados_escolhidos não seja válido
-#  ou retorna 5 caso dados_escolhidos não seja uma lista vazia no primeiro
-#  lançamento do turno atual.
-##########################################################################
-#def faz_lancamento(data_horario, dados_escolhidos):
-#    return
+############################################################################
+#  Gera um novo lançamento para o jogador do turno na partida em andamento.
+#  
+#  dados_escolhidos: lista com os índices (inteiros no intervalo [0,4])
+#   dos dados a terem seus valores mantidos
+#   ou lista vazia para rolar todos os dados
 #
+#  Retorna 0 em caso de sucesso
+#   ou retorna 1 caso não haja partida em andamento
+#   ou retorna 2 caso um dos índices em dados_escolhidos não seja válido
+#   ou retorna 3 caso dados_escolhidos não seja uma lista vazia no primeiro
+#    lançamento do turno atual.
+#   ou retorna 4 caso o jogador do turno atual já tenha esgotado o número 
+#    de tentativas.
+#
+############################################################################
+def faz_lancamento(dados_escolhidos):
+    if not partida_atual:
+        return 1
+    if any(d not in range(1,7) for d in dados_escolhidos):
+        return 2
+    if partida_atual['tentativas'] == 3 and dados_escolhidos:
+        return 3
+    if partida_atual['tentativas'] == 0:
+        return 4
+
+    comb = combinacao.gera_combinacao(dados_escolhidos)
+    partida_atual['combinacao'] = comb['combinacao'] 
+    partida_atual['pts_combinacao'] = comb['pontos']
+    partida_atual['tentativas'] -= 1
+
+    return 0
+
 ######################################################################
 ## Atribui ao jogador do turno os pontos do seu último lançamento (do 
 ##  mesmo turno) na categoria escolhida e passa para o próximo turno.
@@ -131,39 +153,42 @@ def inicia_partida(nomes):
 #def continua_partida(data_horario):
 #    return
 #
-## Gera informações gerais sobre as partida de data_horarios com status #“status”. São por essas informações que a interface de usuário deve se guiar # sobre as mudanças que ocorrem na partida.
-##
-## data_horarios: lista com os atributos “data_horario” das partidas desejadas. #Se for
-##uma lista vazia ou None, cosidera-se todas as partidas registradas.
-##
-## status: status para filtrar das partidas desejadas. Se for None ou string vazia,
-##considera-se qualquer status.
-##
-## Retorna uma lita dicionário do tipo:
-## [ {
-##   “data_horario”,         #identificador
-##   “status”,               #status da partida
-##   “combinacao_atual”,     #lista com os valores dos 5 dados
-##   “pontuacoes_possiveis”, #lista com dicionários com as pontuações possíveis
-##                           # (ver abaixo)
-##
-##   “turno_atual” ,         #número do turno atual
-##   “jogador_da_vez” ,      #nome do jogador da vez
-##   “tentativas” ,          #número de tentativas restantes para lançamento
-##   “jogadores” ,           #lista com os nomes dos jogadores participantes
-##                           #(jogadores desistentes continuam registrados)
-## }, … ]
-##
-## “pontuacoes_possiveis”:
-## [ { “nome”: <nome_da_categoria1>, “pontuacao”: <pontuacao_na_categoria_1> },
-##   { “nome”: <nome_da_categoria2>, “pontuacao”: <pontuacao_na_categoria_2> },
-##   { “nome”: <nome_da_categoria3>, “pontuacao”: <pontuacao_na_categoria_3> }
-##  ... ]
-##Retorna uma lista vazia caso não seja encontrado nenhuma tabela com as chaves
-##escolhidas
-#def obtem_info_partida(data_horarios, status):
-#    return
+
+
+
+##############################################################################
 #
+# Gera informações gerais sobre a partida atual.
+# São por essas informações que a interface de usuário deve se guiar
+# sobre as mudanças que ocorrem na partida.
+#
+# Retorna um dicionário do tipo:
+#   {
+#   “data_horario”,         #identificador
+#   “status”,               #status da partida
+#   “combinacao_atual”,     #lista com os valores dos 5 dados
+#   “pts_combinacoes”,      #lista com dicionários com as pontuações possíveis
+#                           # (ver abaixo)
+#
+#   “turno_atual” ,         #número do turno atual
+#   “jogador_da_vez” ,      #nome do jogador da vez
+#   “tentativas” ,          #número de tentativas restantes para lançamento
+#   “jogadores” ,           #lista com os nomes dos jogadores participantes
+#                           #(jogadores desistentes continuam registrados)
+# }
+#
+# “pts_combinacoes”:
+# [ { “nome”: <nome_da_categoria1>, “pontuacao”: <pontuacao_na_categoria_1> },
+#   { “nome”: <nome_da_categoria2>, “pontuacao”: <pontuacao_na_categoria_2> },
+#   { “nome”: <nome_da_categoria3>, “pontuacao”: <pontuacao_na_categoria_3> }
+#  ... ]
+#
+#  Retorna 1 caso não haja uma partida em andamento.
+#
+##############################################################################
+def obtem_info_partida():
+    return partida_atual
+
 ##Retira um jogador da partida sem afetar o resto da partida.
 ##Retorna 0 em caso de sucesso.
 ## ou retorna 1 caso a partida informada não exista
