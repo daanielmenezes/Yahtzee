@@ -32,11 +32,13 @@
 #  Mocks criados: 
 #    -tabela.insere_pontuacao 
 #    -tabela.obtem_tabelas
+#---------------------------v0.4.1: 28/05/2020------------------------
+#  Por: Daniel Menezes
+#  Removido import indevido de jogador.
 #######################################################################
 
 from random import shuffle
 from datetime import datetime
-from entidades import jogador
 from entidades import tabela
 from funcionalidades import banco_de_dados
 from funcionalidades import combinacao

@@ -117,7 +117,6 @@ class Test(unittest.TestCase):
 
     def test_AAA_marca_pontuacao_ok_passou_o_turno(self):
         print("Caso de Teste AAA - Marca pontuacao passou o turno.")
-        print(self.jogadorAnterior)
         retorno = partida.obtem_info_partida()['turno']
         self.assertEqual( retorno, 2 )
 
