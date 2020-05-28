@@ -57,7 +57,7 @@ partida_atual = {}
 #MOCKS:
 tabela = mock.Mock()
 tabela.cria_tabela.side_effect = [1, 0, 0, 0]
-tabela.insere_pontuacao.side_effect = [2]
+tabela.insere_pontuacao.side_effect = [0,4]
 tabela.obtem_tabelas.side_effect = [
        [{'nome_jogador':'flavio', 
          'data_horario_partida':None, 

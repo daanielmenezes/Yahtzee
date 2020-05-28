@@ -126,6 +126,13 @@ class Test(unittest.TestCase):
         info = partida.obtem_info_partida()['tentativas']
         self.assertEqual( info, 3 )
 
+    def test_AAA_marca_pontuacao_nok_jogador_ja_marcou_na_categoria(self):
+        print("Caso de Teste AAA - Erro ao marcar pontuacao ja marcada"+
+                " pelo jogador.")
+        partida.faz_lancamento([]) 
+        retorno = partida.marca_pontuacao('chance')
+        self.assertEqual( retorno, 4 )
+        
 #################
 
     def test_AAA_pausa_partida_ok(self):
@@ -149,18 +156,6 @@ class Test(unittest.TestCase):
 
 
 
-    def test_AAA_marca_pontuacao_nok_jogador_ja_marcou_na_categoria(self):
-        print("Caso de Teste AAA - Erro ao marcar pontuacao ja marcada"+
-                " pelo jogador.")
-        data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
-        #voltando para o turno do flavio:
-        partida.faz_lancamento(data_horario, []) 
-        partida.marca_pontuacao(data_horario, 'chance')
-        #turno do flavio(ja marcou chance em outro teste):
-        partida.faz_lancamento(data_horario, []) 
-        retorno = partida.marca_pontuacao(data_horario, 'chance')
-        self.assertEqual( retorno, 6 )
-        
     def test_AAA_pausa_partida_nok_partida_inexistente(self):
         print("Caso de Teste AAA - Erro ao pausar uma partida inexistente.")
         retorno = partida.pausa_partida(datetime(2000, 1, 11, 12, 21, 41, 0))
