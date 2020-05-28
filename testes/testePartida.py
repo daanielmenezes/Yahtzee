@@ -1,7 +1,7 @@
 import unittest
 from entidades import tabela
 
-class Testmock(unittest.TestCase):
+class Test(unittest.TestCase):
 ##########################
 #      TESTES PARTIDA:      
 #      Daniel Menezes 
@@ -24,12 +24,6 @@ class Testmock(unittest.TestCase):
 #sucesso e de partida encerrada de pausa_partida e depois o retorno
 #de partida encerrada de marca_pontuacao.
 
-#Guia:
-#A partida do juan nao existe
-#A partida do flavio, lucas e julia ficara em andamento
-#A partida do eleanor sera pausada
-#A partida do hugo sera encerrada
-
     def test_AAA_inicia_partida_nok_jogador_nao_existente(self):
         print("Caso de Teste AAA - Inicia partida nao aceita jogador"+
             " inexistente.")
@@ -42,6 +36,12 @@ class Testmock(unittest.TestCase):
         retorno = partida.faz_lancamento([1,2])
         self.assertEqual( retorno, 1 )
         
+    def test_AAA_marca_pontuacao_nok_sem_partida(self):
+        print("Caso de Teste AAA - Erro ao marcar pontuacao sem nenhuma"+
+                " partida em andamento.")
+        retorno = partida.marca_pontuacao('1')
+        self.assertEqual( retorno, 1 )
+
     def test_AAA_inicia_partida_ok(self):
         print("Caso de Teste AAA - Inicia partida com sucesso.")
         jogador.insere("flavio")
@@ -69,10 +69,22 @@ class Testmock(unittest.TestCase):
         retorno = partida.faz_lancamento([1,3])
         self.assertEqual(retorno, 3)
 
+    def test_AAA_marca_pontuacao_nok_jogador_do_turno_nao_lancou(self):
+        print("Caso de Teste AAA - Erro ao marcar pontuacao sem lancar"+
+                " dados no turno.")
+        retorno = partida.marca_pontuacao('2')
+        self.assertEqual( retorno, 3 )
+
     def test_AAA_faz_lancamento_ok(self):
         print("Caso de Teste AAA - Faz lancamento em partida com sucesso.")
         retorno = partida.faz_lancamento([])
         self.assertEqual(retorno, 0)
+
+    def test_AAA_faz_lancamento_ok_reduziu_tentativas(self):
+        print("Caso de Teste AAA - Faz lancamento reduz o numero de"+
+                " tentativas.")
+        info = partida.obtem_info_partida()
+        self.assertEqual( info['tentativas'], 2 )
 
     def test_AAA_faz_lancamento_nok_tentativas_esgotadas(self):
         print("Caso de Teste AAA - Faz lancamento erro quando o jogador já"+
@@ -89,7 +101,33 @@ class Testmock(unittest.TestCase):
         dados = ([ dadoNum for dadoNum in combinacao if dadoNum in range(1,7)])
         #confere que tem 5 numeros [1,6] na lista retornada
         self.assertEqual( len(dados), 5 )  
-        
+       
+    def test_AAA_marca_pontuacao_nok_categoria_invalida(self):
+        print("Caso de Teste AAA - Erro ao marcar pontuacao invalida.")
+        partida.faz_lancamento([])
+        retorno = partida.marca_pontuacao('abacate')
+        self.assertEqual( retorno, 2 )
+
+    def test_AAA_marca_pontuacao_ok_sucesso(self):
+        print("Caso de Teste AAA - Marca pontuacao em uma categoria com"+
+                " sucesso.")
+        self.jogadorAnterior = partida.obtem_info_partida()['jogador_da_vez']
+        retorno = partida.marca_pontuacao('chance')
+        self.assertEqual( retorno, 0 )
+
+    def test_AAA_marca_pontuacao_ok_passou_o_turno(self):
+        print("Caso de Teste AAA - Marca pontuacao passou o turno.")
+        print(self.jogadorAnterior)
+        retorno = partida.obtem_info_partida()['turno']
+        self.assertEqual( retorno, 2 )
+
+    def test_AAA_marca_pontuacao_ok_restaura_tentativa(self):
+        print("Caso de Teste AAA - Marca pontuacao proximo jogador tem 3"+
+                " tentativas.")
+        info = partida.obtem_info_partida()['tentativas']
+        self.assertEqual( info, 3 )
+
+#################
 
     def test_AAA_pausa_partida_ok(self):
         print("Caso de Teste AAA - Partida pausada com sucesso.")
@@ -103,59 +141,14 @@ class Testmock(unittest.TestCase):
         status = partida.obtem_info_partida([data_horario], [])['status']
         assertEqual(status, 'pausada') 
 
-    def test_AAA_marca_pontuacao_ok_sucesso(self):
-        print("Caso de Teste AAA - Marca pontuacao em uma categoria com"+
-                " sucesso.")
-        data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
-        partida.faz_lancamento(data_horario,[])
-        retorno = partida.marca_pontuacao(data_horario, 'chance')
-        #marca pontos pro flavio e passa pro lucas
-        self.assertEqual( retorno, 0 )
-
     def test_AAA_marca_pontuacao_ok_pontos_na_tabela(self):
-        print("Caso de Teste AAA - Insere pontuacao na tabela com sucesso")
+        print("Caso de Teste AAA - Marca Pontuacao Insere pontuacao na"+
+                " tabela com sucesso")
         pts_cat = tabela.obtem_tabelas(['flavio'],[])[-1]['pontos_por_categoria']
         chance = next(cat for cat in pts_cat if cat['nome'] == 'chance')[0] 
         self.assertGreater( chance['pontuacao'], 0 )
 
 
-    def test_AAA_marca_pontuacao_nok_partida_inexistente(self):
-        print("Caso de Teste AAA - Erro ao marcar pontuacao em partida"+
-                " inexistente.")
-        retorno = partida.marca_pontuacao(datetime(2000,1,11,10,21,41,1320), 'chance')
-        self.assertEqual( retorno, 1 )
-
-    def test_AAA_marca_pontuacao_nok_partida_pausada(self):
-        print("Caso de Teste AAA - Erro ao marcar pontuacao em partida "+
-                "pausada.")
-        data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
-        retorno = partida.marca_pontuacao(data_horario, 'chance')
-        self.assertEqual( retorno, 2 )
-
-    def test_AAA_marca_pontuacao_nok_partida_encerrada(self):
-        print("Caso de Teste AAA - Erro ao marcar pontuacao em partida"+
-                " encerrada.")
-        data_horario = tabela.obtem_tabelas(['hugo'],[])[-1]['data_horario']
-        retorno = partida.marca_pontuacao(data_horario, 'chance')
-        self.assertEqual( retorno, 3 )
-
-    def test_AAA_marca_pontuacao_nok_categoria_invalida(self):
-        print("Caso de Teste AAA - Erro ao marcar pontuacao invalida.")
-        data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
-        partida.faz_lancamento(data_horario, [])
-        #turno do lucas
-        retorno = partida.marca_pontuacao(data_horario, 'abacate')
-        self.assertEqual( retorno, 4 )
-
-    def test_AAA_marca_pontuacao_nok_jogador_do_turno_nao_lancou(self):
-        print("Caso de Teste AAA - Erro ao marcar pontuacao sem lancar"+
-                " dados no turno.")
-        data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
-        partida.marca_pontuacao(data_horario, '1') #marca ptos do lucas
-                                                   #e passa para a julia
-        retorno = partida.marca_pontuacao(data_horario, '2')
-        #turno da julia
-        self.assertEqual( retorno, 5 )
 
     def test_AAA_marca_pontuacao_nok_jogador_ja_marcou_na_categoria(self):
         print("Caso de Teste AAA - Erro ao marcar pontuacao ja marcada"+

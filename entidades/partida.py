@@ -25,6 +25,13 @@
 #---------------------------v0.3.0: 27/05/2020-------------------------
 #  Por: Daniel Menezes
 #  Implementada faz_lancamento. Passando nos testes.
+#
+#---------------------------v0.4.0: 28/05/2020-------------------------
+#  Por: Daniel Menezes
+#  Implementada marca_pontuacao usando mock. Passando nos testes.
+#  Mocks criados: 
+#    -tabela.insere_pontuacao 
+#    -tabela.obtem_tabelas
 #######################################################################
 
 from random import shuffle
@@ -44,8 +51,52 @@ partida_atual = {}
 #MOCKS:
 tabela = mock.Mock()
 tabela.cria_tabela.side_effect = [1, 0, 0, 0]
+tabela.insere_pontuacao.side_effect = [2]
+tabela.obtem_tabelas.side_effect = [
+       [{'nome_jogador':'flavio', 
+         'data_horario_partida':None, 
+         'pontos_por_categoria': [ 
+                {'nome':'chance', 'pontuacao':14},
+                {'nome':'yahtzee', 'pontuacao':None}
+             ],
+         'pontuacao_total':14, 
+         'colocacao':1,
+         'desistencia':False
+       }]
+    ]
 
+def _proximo_jogador():
+    index = partida_atual['jogadores'].index(partida_atual['jogador_da_vez'])
+    index = (index + 1) % len(partida_atual['jogadores'])
+    return partida_atual['jogadores'][index]
 
+def _partida_deve_acabar():
+    tabelas = tabela.obtem_tabelas([],[partida_atual['data_horario']])
+
+    todos_desistiram = False
+    if all(tabela_jogador['desistencia'] for tabela_jogador in tabelas):
+        todos_desistiram = True
+    else:
+        todas_as_tabelas_preenchidas = False
+        jogadores_nao_desistentes = [tabela_jogador for tabela_jogador \
+                in tabelas if not tabela_jogador['desistencia']]
+        pontuacoes = []
+        for tabela_jogador in jogadores_nao_desistentes:
+            for pontos_por_cat in tabela_jogador['pontos_por_categoria']:
+                pontuacoes.append(pontos_por_cat)
+        if all(pts['pontuacao'] != None for pts in pontuacoes ):
+            todas_as_tabelas_preenchidas = True
+
+    return todos_desistiram or todas_as_tabelas_preenchidas
+
+def _altera_status_bd(status):
+    sql = """UPDATE Partida
+             SET status = %s
+             WHERE data_horario = %s"""
+    banco = banco_de_dados.abre_acesso()
+    banco['cursor'].execute(sql, (status, partida_atual['data_horario']))
+    banco_de_dados.fecha_acesso(banco)
+    return
 
 #################################################################
 # Cria uma nova partida e associa tabelas para os seus jogadores.
@@ -77,7 +128,7 @@ def inicia_partida(nomes):
     shuffle(nomes)
     partida_atual['data_horario'] = data_horario
     partida_atual['combinacao'] = None
-    partida_atual['pts_combincao'] = None
+    partida_atual['pts_combinacao'] = None
     partida_atual['turno'] = 1
     partida_atual['tentativas'] = 3
     partida_atual['jogadores'] = nomes
@@ -119,23 +170,55 @@ def faz_lancamento(dados_escolhidos):
 
     return 0
 
-######################################################################
-## Atribui ao jogador do turno os pontos do seu último lançamento (do 
-##  mesmo turno) na categoria escolhida e passa para o próximo turno.
-## categoria: nome da categoria escolhida
-## Retorna 0 em caso de sucesso
-##  ou retorna 1 caso a partida informada não exista
-##  ou retorna 2 caso a partida esteja pausada
-##  ou retorna 3 caso a partida esteja encerrada
-##  ou retorna 4 caso nome_categoria seja inválido
-##  ou retorna 5 caso o jogador do turno ainda não tenha realizado
-##  um lançamento no turno atual.
-##  ou retorna 6 caso o jogador já tenha marcado pontos
-##  na categoria escolhida nessa partida
-######################################################################
-#def marca_pontuacao(data_horario, categoria):
-#    return
+########################################################################
 #
+#  Atribui ao jogador do turno da partida atual os pontos do seu último
+#   lançamento (do mesmo turno) na categoria escolhida e passa para o
+#   próximo turno.
+#
+#  categoria: nome da categoria escolhida
+#
+#  Retorna 0 em caso de sucesso
+#   ou retorna 1 caso não haja partida em andamento
+#   ou retorna 2 caso a categoria seja inválida
+#   ou retorna 3 caso o jogador do turno ainda não tenha realizado
+#     um lançamento no turno atual.
+#   ou retorna 4 caso o jogador já tenha marcado pontos
+#     na categoria escolhida nessa partida
+#
+########################################################################
+def marca_pontuacao(categoria):
+    if not partida_atual:
+        return 1
+    if partida_atual['tentativas'] == 3:
+        return 3
+
+    for categ in partida_atual['pts_combinacao']:
+        if categ['nome'] == categoria:
+            pontos = categ['pontuacao']
+            break
+    else:
+        return 2
+
+    args = [partida_atual['jogador_da_vez'],
+            partida_atual['data_horario'],
+            categoria,
+            pontos]
+    ret_insere = tabela.insere_pontuacao(*args)
+
+    if ret_insere == 4:
+        return 4
+
+    if _partida_deve_acabar():
+        partida_atual['status'] = 'encerrada'  
+        _altera_status_bd('encerrada') 
+    else:
+        partida_atual['jogador_da_vez'] = _proximo_jogador()
+        partida_atual['turno'] += 1
+        partida_atual['tentativas'] = 3
+
+    return 0
+
 ## Pausa uma partida em andamento.
 ## data_horario: identificador da partida.
 ## retorna 0 em caso de sucesso
