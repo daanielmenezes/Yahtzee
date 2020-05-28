@@ -35,6 +35,10 @@
 #---------------------------v0.4.1: 28/05/2020------------------------
 #  Por: Daniel Menezes
 #  Removido import indevido de jogador.
+#
+#---------------------------v0.4.2: 28/05/2020------------------------
+#  Por: Daniel Menezes
+#  Adicionado marca_pontuacao em __all__.
 #######################################################################
 
 from random import shuffle
@@ -45,7 +49,7 @@ from funcionalidades import combinacao
 
 from unittest import mock
 
-__all__ = ['inicia_partida', 'faz_lancamento']
+__all__ = ['inicia_partida', 'faz_lancamento', 'marca_pontuacao']
 
 
 partida_atual = {}
