@@ -47,15 +47,21 @@
 #  
 #######################################################################
 
-from random import shuffle
 from datetime import datetime
+from random import shuffle
+from os.path import isdir
+from xml.etree import ElementTree
+from xml.etree.ElementTree import Element, SubElement, Comment
+from xml.dom import minidom
+
 from entidades import tabela
 from funcionalidades import banco_de_dados
 from funcionalidades import combinacao
 
 from unittest import mock
 
-__all__ = ['inicia_partida', 'faz_lancamento', 'marca_pontuacao', 'desiste']
+__all__ = ['inicia_partida', 'faz_lancamento', 'marca_pontuacao', 'desiste',
+        'obtem_partidas']
 
 
 partida_atual = {}
@@ -156,6 +162,7 @@ def inicia_partida(nomes):
     partida_atual['jogadores'] = nomes
     partida_atual['jogador_da_vez'] = nomes[0]
     partida_atual['status'] = 'andamento'
+    partida_atual['salva'] = False
 
     return data_horario 
 
@@ -190,6 +197,7 @@ def faz_lancamento(dados_escolhidos):
     partida_atual['pts_combinacao'] = comb['pontos']
     partida_atual['tentativas'] -= 1
 
+    partida_atual['salva'] = False
     return 0
 
 ########################################################################
@@ -231,6 +239,7 @@ def marca_pontuacao(categoria):
     if ret_insere == 4:
         return 4
 
+    partida_atual['salva'] = False
     if _partida_deve_acabar():
         partida_atual['status'] = 'encerrada'  
         _altera_status_bd('encerrada') 
@@ -255,17 +264,92 @@ def desiste(nome_jogador):
     tabela.registra_desistencia(nome_jogador, partida_atual['data_horario'])
     if partida_atual['jogador_da_vez'] == nome_jogador:
         _passa_turno()
+    partida_atual['salva'] = False
     return 0
 
-## Pausa uma partida em andamento.
-## data_horario: identificador da partida.
-## retorna 0 em caso de sucesso
-## ou retorna 1 caso a partida informada não exista
-## ou retorna 2 caso a partida esteja pausada
-## ou retorna 3 caso a partida esteja encerrada
-#def pausa_partida(data_horario):
-#    return
+############################################################################
+# Gera uma lista de dicionários com as partidas registradas no histórico.
+# 
+# data_horario: data_horario da partida a buscar ou uma lista
+#   com os data_horario das partidas a buscar. Se for uma lista vazia ou None,
+#   busca partidas com qualquer data_horario.
+# 
+# status: status da partida a buscar ou uma lista com os status das partidas
+#   a buscar. Se for uma lista vazia ou None, busca partidas com qualquer
+#   status.
 #
+# Retorna uma lista de dicionários do tipo { ‘data_horario’, ‘status’ }.
+#  ou retorna uma lista vazia caso não haja partida com os parâmetros passados.
+#  ou retorna 1 caso um dos parâmetros seja inválido
+############################################################################
+def obtem_partidas(data_horario = [], status = []):
+    if isinstance(data_horario, datetime):
+        data_horario = [data_horario]
+    if isinstance(status, str):
+        status = [status]
+    if not isinstance(data_horario, list) or not isinstance(status, list):
+        return 1
+
+    sqlBusca = """ SELECT * FROM Partida"""
+    
+    banco = banco_de_dados.abre_acesso()
+    if data_horario:
+        sqlBusca += ' WHERE data_horario in (%s'+\
+                    ((len(data_horario)-1)*',%s') + ')'
+        if status:
+            sqlBusca += ' AND status in (%s' +\
+                        ((len(status)-1)*',%s') + ')'
+        banco['cursor'].execute(sqlBusca, tuple(data_horario+status))
+    elif status:
+        sqlBusca += ' WHERE status in (%s'+\
+                    ((len(status)-1)*',%s') + ')'
+        banco['cursor'].execute(sqlBusca, status)
+    else:
+        banco['cursor'].execute(sqlBusca)
+    resultado = [dictPartida for dictPartida in banco['cursor']]
+    banco_de_dados.fecha_acesso(banco)
+    return resultado
+
+#############################################################
+# Salva a partida em andamento em um arquivo XML.
+#
+#  path: caminho para a pasta onde o arquivo será criado. 
+#
+#  retorna 0 em caso de sucesso
+#   ou retorna 1 caso não haja partida em andamento
+#   ou retorna 2 caso o caminho não seja econtrado
+#   ou retorna 3 caso haja erro de escrita.
+#
+#############################################################
+def salva_partida(path):
+    if not _ha_partida_em_andamento():
+        return 1
+    if not isdir(path):
+        return 2
+    
+    elem_partida = Element('partida')
+    for key, value in partida_atual:
+        if key == 'jogadores':
+            elem_jogadores = SubElement(elem_partida, 'jogadores')
+            for nome_jogador in value:
+                elem_nome = SubElement(elem_jogadores)
+                elem_nome.text = nome_jogador
+        elif key == 'salva':
+            pass
+        else:
+            elem_atributo = SubElement(elem_partida, key)
+            elem_atributo.text = str(value)
+
+    arquivo_nome = partida_atual['data_horario'].strftime('%Y%m%d%H%M%S%f')
+    with open(os.path.join(path,arquivo_nome)) as xml_file:
+        rough_string = ElementTree.tostring(elem_partida, 'utf-8')
+        reparsed = minidom.parseString(rough_string)
+        final_string = reparsed.toprettyxml(indent="  ")
+        xml_file.write(final_string)
+
+    partida_atual['salva'] = True
+    return 0
+
 ## Carrega uma partida que foi pausada anteriormente.
 ## data_horario: identificador da partida.
 ## retorna 0 em caso de sucesso
@@ -274,6 +358,13 @@ def desiste(nome_jogador):
 #def continua_partida(data_horario):
 #    return
 #
+
+
+#Encerra a partida em andamento. O status da partida será alterado para
+# 'encerrada' caso esteja salva ou 'pausada' caso não esteja salva.
+#
+#def encerra_partida():
+#   return
 
 
 
@@ -286,7 +377,7 @@ def desiste(nome_jogador):
 # Retorna um dicionário do tipo:
 #   {
 #   “data_horario”,         #identificador
-#   “status”,               #status da partida
+#   status”,               #status da partida
 #   “combinacao_atual”,     #lista com os valores dos 5 dados
 #   “pts_combinacoes”,      #lista com dicionários com as pontuações possíveis
 #                           # (ver abaixo)
@@ -295,7 +386,9 @@ def desiste(nome_jogador):
 #   “jogador_da_vez” ,      #nome do jogador da vez
 #   “tentativas” ,          #número de tentativas restantes para lançamento
 #   “jogadores” ,           #lista com os nomes dos jogadores participantes
-#                           #(jogadores desistentes continuam registrados)
+#                               (jogadores desistentes não inclusos)
+#   "salva"                 #diz se a partida foi salva desde a última ação
+#                               (True/False)
 # }
 #
 # “pts_combinacoes”:

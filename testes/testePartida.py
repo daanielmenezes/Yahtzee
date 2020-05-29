@@ -184,12 +184,6 @@ class Test(unittest.TestCase):
         retorno = partida.pausa_partida( data_horario )
         self.assertEqual( retorno, 3 )
 
-    def test_AAA_partida_desiste_ok(self):
-        print("Caso de Teste AAA - Desistir da partida com sucesso.")
-        data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
-        retorno = partida.desiste(data_horario, 'julia')
-        self.assertEqual( retorno, 0 )
-
     def test_AAA_continua_partida_ok(self):
         print("Caso de Teste AAA - Continua partida com sucesso.")
         data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
