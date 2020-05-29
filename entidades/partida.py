@@ -39,6 +39,12 @@
 #---------------------------v0.4.2: 28/05/2020------------------------
 #  Por: Daniel Menezes
 #  Adicionado marca_pontuacao em __all__.
+#
+#---------------------------v0.5.0: 28/05/2020------------------------
+#  Por: Daniel Menezes
+#  Criado mock de tabela.registra_desistencia
+#  Implementada desiste. Passando nos testes.
+#  
 #######################################################################
 
 from random import shuffle
@@ -49,7 +55,7 @@ from funcionalidades import combinacao
 
 from unittest import mock
 
-__all__ = ['inicia_partida', 'faz_lancamento', 'marca_pontuacao']
+__all__ = ['inicia_partida', 'faz_lancamento', 'marca_pontuacao', 'desiste']
 
 
 partida_atual = {}
@@ -70,6 +76,7 @@ tabela.obtem_tabelas.side_effect = [
          'desistencia':False
        }]
     ]
+tabela.registra_desistencia.return_value = 0
 
 def _proximo_jogador():
     index = partida_atual['jogadores'].index(partida_atual['jogador_da_vez'])
@@ -104,6 +111,15 @@ def _altera_status_bd(status):
     banco_de_dados.fecha_acesso(banco)
     return
 
+def _ha_partida_em_andamento():
+    return (partida_atual and partida_atual['status'] == 'andamento')
+
+def _passa_turno():
+    partida_atual['jogador_da_vez'] = _proximo_jogador()
+    partida_atual['turno'] += 1
+    partida_atual['tentativas'] = 3
+    return
+
 #################################################################
 # Cria uma nova partida e associa tabelas para os seus jogadores.
 # nomes: lista de nomes dos jogadores participantes.
@@ -113,7 +129,7 @@ def _altera_status_bd(status):
 # ou retorna 2 caso já haja uma partida em andamento.
 #################################################################
 def inicia_partida(nomes):
-    if (partida_atual):
+    if _ha_partida_em_andamento():
         return 2
     data_horario = datetime.now()
     for jogador in nomes:
@@ -160,7 +176,7 @@ def inicia_partida(nomes):
 #
 ############################################################################
 def faz_lancamento(dados_escolhidos):
-    if not partida_atual:
+    if not _ha_partida_em_andamento():
         return 1
     if any(d not in range(1,7) for d in dados_escolhidos):
         return 2
@@ -194,7 +210,7 @@ def faz_lancamento(dados_escolhidos):
 #
 ########################################################################
 def marca_pontuacao(categoria):
-    if not partida_atual:
+    if not _ha_partida_em_andamento():
         return 1
     if partida_atual['tentativas'] == 3:
         return 3
@@ -219,10 +235,26 @@ def marca_pontuacao(categoria):
         partida_atual['status'] = 'encerrada'  
         _altera_status_bd('encerrada') 
     else:
-        partida_atual['jogador_da_vez'] = _proximo_jogador()
-        partida_atual['turno'] += 1
-        partida_atual['tentativas'] = 3
+        _passa_turno()
 
+    return 0
+
+##############################################################################
+# Retira um jogador da partida.
+# Retorna 0 em caso de sucesso.
+#  ou retorna 1 caso não haja partida em andamento
+#  ou retorna 2 caso nome_jogador não seja o nome de nenhum jogador da partida
+##############################################################################
+def desiste(nome_jogador):
+    if not _ha_partida_em_andamento():
+        return 1
+    if nome_jogador not in partida_atual['jogadores']:
+        return 2
+    
+    partida_atual['jogadores'].remove(nome_jogador)
+    tabela.registra_desistencia(nome_jogador, partida_atual['data_horario'])
+    if partida_atual['jogador_da_vez'] == nome_jogador:
+        _passa_turno()
     return 0
 
 ## Pausa uma partida em andamento.
@@ -277,14 +309,3 @@ def marca_pontuacao(categoria):
 ##############################################################################
 def obtem_info_partida():
     return partida_atual
-
-##Retira um jogador da partida sem afetar o resto da partida.
-##Retorna 0 em caso de sucesso.
-## ou retorna 1 caso a partida informada não exista
-## ou retorna 2 caso a partida esteja pausada
-## ou retorna 3 caso a partida esteja encerrada
-## ou retorna 4 caso o nome seja inválido
-## ou retorna 5 caso o jogador já tenha desistido da partida.
-#def desiste(data_horario, nome_jogador):
-#    return
-#

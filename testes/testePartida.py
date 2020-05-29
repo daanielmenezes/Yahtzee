@@ -42,6 +42,11 @@ class Test(unittest.TestCase):
         retorno = partida.marca_pontuacao('1')
         self.assertEqual( retorno, 1 )
 
+    def test_AAA_desiste_nok_sem_partida(self):
+        print("Caso de Teste AAA - Erro desiste sem partida em andamento.")
+        retorno = partida.desiste('flavio')
+        self.assertEqual( retorno, 1 )
+
     def test_AAA_inicia_partida_ok(self):
         print("Caso de Teste AAA - Inicia partida com sucesso.")
         jogador.insere("flavio")
@@ -56,6 +61,21 @@ class Test(unittest.TestCase):
                 " com outra partida em andamento.")
         retorno = partida.inicia_partida(["lucas"])
         self.assertEqual( retorno , 2 )
+
+    def test_AAA_desiste_ok_condicao_retorno(self):
+        print("Caso de Teste AAA - Desiste com sucesso.")
+        retorno = partida.desiste('julia')
+        self.assertEqual( retorno, 0 )
+
+    def test_AAA_desiste_nok_nome_invalido(self):
+        print("Caso de Teste AAA - Erro desiste jogador invalido.")
+        retorno = partida.desiste('julia')
+        self.assertEqual( retorno, 2 )
+
+    def test_AAA_desiste_ok_retira_jogador(self):
+        print("Caso de Teste AAA - Desiste retira jogador da partida.")
+        jogadores = partida.obtem_info_partida()['jogadores']
+        self.assertNotIn( 'julia', jogadores )
 
     def test_AAA_faz_lancamento_nok_indice_invalido(self):
         print("Caso de Teste AAA - Erro em fazer lancamento com indices de "+
@@ -147,15 +167,6 @@ class Test(unittest.TestCase):
         status = partida.obtem_info_partida([data_horario], [])['status']
         assertEqual(status, 'pausada') 
 
-    def test_AAA_marca_pontuacao_ok_pontos_na_tabela(self):
-        print("Caso de Teste AAA - Marca Pontuacao Insere pontuacao na"+
-                " tabela com sucesso")
-        pts_cat = tabela.obtem_tabelas(['flavio'],[])[-1]['pontos_por_categoria']
-        chance = next(cat for cat in pts_cat if cat['nome'] == 'chance')[0] 
-        self.assertGreater( chance['pontuacao'], 0 )
-
-
-
     def test_AAA_pausa_partida_nok_partida_inexistente(self):
         print("Caso de Teste AAA - Erro ao pausar uma partida inexistente.")
         retorno = partida.pausa_partida(datetime(2000, 1, 11, 12, 21, 41, 0))
@@ -178,37 +189,6 @@ class Test(unittest.TestCase):
         data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
         retorno = partida.desiste(data_horario, 'julia')
         self.assertEqual( retorno, 0 )
-
-    def test_AAA_partida_desiste_nok_partida_inexistente(self):
-        print("Caso de Teste AAA - Erro ao desistir em uma partida inexistente.")
-        retorno = partida.desiste(datetime(2000, 1, 11, 12, 21, 11, 0), 'flavio')
-        self.assertEqual( retorno, 1 )
-
-    def test_AAA_partida_desiste_nok_partida_pausada(self):
-        print("Caso de Teste AAA - Erro ao desistir em uma partida pausada.")
-        data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
-        retorno = partida.desiste(data_horario, 'eleanor')
-        self.assertEqual( retorno, 2 )
-
-    def test_AAA_partida_desiste_nok_partida_encerrada(self):
-        print("Caso de Teste AAA - Erro ao desistir em uma partida encerrada.")
-        data_horario = tabela.obtem_tabelas(['hugo'],[])[-1]['data_horario']
-        retorno = partida.desiste( data_horario, 'hugo' )
-        self.assertEqual( retorno, 3 )
-
-    def test_AAA_partida_desiste_nok_nome_invalido(self):
-        print("Caso de Teste AAA - Erro ao desistir partida de um jogador"+
-                " invalido.")
-        data_horario = tabela.obtem_tabelas(['lucas'],[])[-1]['data_horario']
-        retorno = partida.desiste( data_horario, 'juan' )
-        self.assertEqual( retorno, 4 )
-        
-    def test_AAA_partida_desiste_nok_jogador_ja_desistiu(self):
-        print("Caso de Teste AAA - Erro ao desistir partida de um jogador "+
-                "ja desistente.")
-        data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
-        retorno = partida.desiste( data_horario, 'julia' )
-        self.assertEqual( retorno, 5 )
 
     def test_AAA_continua_partida_ok(self):
         print("Caso de Teste AAA - Continua partida com sucesso.")
