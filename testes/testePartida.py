@@ -62,21 +62,6 @@ class Test(unittest.TestCase):
         retorno = partida.inicia_partida(["lucas"])
         self.assertEqual( retorno , 2 )
 
-    def test_AAA_desiste_ok_condicao_retorno(self):
-        print("Caso de Teste AAA - Desiste com sucesso.")
-        retorno = partida.desiste('julia')
-        self.assertEqual( retorno, 0 )
-
-    def test_AAA_desiste_nok_nome_invalido(self):
-        print("Caso de Teste AAA - Erro desiste jogador invalido.")
-        retorno = partida.desiste('julia')
-        self.assertEqual( retorno, 2 )
-
-    def test_AAA_desiste_ok_retira_jogador(self):
-        print("Caso de Teste AAA - Desiste retira jogador da partida.")
-        jogadores = partida.obtem_info_partida()['jogadores']
-        self.assertNotIn( 'julia', jogadores )
-
     def test_AAA_faz_lancamento_nok_indice_invalido(self):
         print("Caso de Teste AAA - Erro em fazer lancamento com indices de "+
                 "dados invalidos.")
@@ -131,7 +116,7 @@ class Test(unittest.TestCase):
     def test_AAA_marca_pontuacao_ok_sucesso(self):
         print("Caso de Teste AAA - Marca pontuacao em uma categoria com"+
                 " sucesso.")
-        self.jogadorAnterior = partida.obtem_info_partida()['jogador_da_vez']
+        partida.obtem_info_partida()['jogador_da_vez']
         retorno = partida.marca_pontuacao('chance')
         self.assertEqual( retorno, 0 )
 
@@ -139,6 +124,22 @@ class Test(unittest.TestCase):
         print("Caso de Teste AAA - Marca pontuacao passou o turno.")
         retorno = partida.obtem_info_partida()['turno']
         self.assertEqual( retorno, 2 )
+
+    def test_AAA_desiste_ok_condicao_retorno(self):
+        print("Caso de Teste AAA - Desiste com sucesso.")
+        retorno = partida.desiste('julia')
+        self.assertEqual( retorno, 0 )
+
+    def test_AAA_desiste_ok_retira_jogador(self):
+        print("Caso de Teste AAA - Desiste retira jogador da partida.")
+        jogadores = partida.obtem_info_partida()['jogadores']
+        self.assertNotIn( 'julia', jogadores )
+
+    def test_AAA_desiste_nok_nome_invalido(self):
+        print("Caso de Teste AAA - Erro desiste jogador invalido.")
+        retorno = partida.desiste('julia')
+        self.assertEqual( retorno, 2 )
+
 
     def test_AAA_marca_pontuacao_ok_restaura_tentativa(self):
         print("Caso de Teste AAA - Marca pontuacao proximo jogador tem 3"+
@@ -183,12 +184,6 @@ class Test(unittest.TestCase):
         data_horario = tabela.obtem_tabelas(['hugo'],[])[-1]['data_horario']
         retorno = partida.pausa_partida( data_horario )
         self.assertEqual( retorno, 3 )
-
-    def test_AAA_partida_desiste_ok(self):
-        print("Caso de Teste AAA - Desistir da partida com sucesso.")
-        data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
-        retorno = partida.desiste(data_horario, 'julia')
-        self.assertEqual( retorno, 0 )
 
     def test_AAA_continua_partida_ok(self):
         print("Caso de Teste AAA - Continua partida com sucesso.")

@@ -45,6 +45,12 @@
 #  Criado mock de tabela.registra_desistencia
 #  Implementada desiste. Passando nos testes.
 #  
+#---------------------------v0.5.1: 29/05/2020------------------------
+#  Por: Daniel Menezes
+#  Consertado bug em que desiste removia o jogador da partida antes de
+#  passar o turno. Agora ela passa o turno e depois remove o jogador.
+#  O bug ocorria porque achar o proximo jogador depende do jogador do
+#  turno atual.
 #######################################################################
 
 from random import shuffle
@@ -251,10 +257,10 @@ def desiste(nome_jogador):
     if nome_jogador not in partida_atual['jogadores']:
         return 2
     
-    partida_atual['jogadores'].remove(nome_jogador)
-    tabela.registra_desistencia(nome_jogador, partida_atual['data_horario'])
     if partida_atual['jogador_da_vez'] == nome_jogador:
         _passa_turno()
+    partida_atual['jogadores'].remove(nome_jogador)
+    tabela.registra_desistencia(nome_jogador, partida_atual['data_horario'])
     return 0
 
 ## Pausa uma partida em andamento.
