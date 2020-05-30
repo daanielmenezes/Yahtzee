@@ -68,6 +68,7 @@ from xml.etree.ElementTree import Element, SubElement, Comment
 from xml.dom import minidom
 
 from entidades import tabela
+from entidades.jogador import valida_jogador
 from funcionalidades import banco_de_dados
 from funcionalidades import combinacao
 
@@ -152,21 +153,17 @@ def _passa_turno():
 def inicia_partida(nomes):
     if _ha_partida_em_andamento():
         return 2
-    data_horario = datetime.now()
-    for jogador in nomes:
-        cod_retorno = tabela.cria_tabela(jogador, data_horario) 
-        if cod_retorno == 1:
-            #jogador nao existe
-            for jogador_a_remover in nomes:
-                if jogador == jogador_a_remover:
-                    break
-                tabela.remove(jogador, data_horario)
-            return 1
+    if any(not valida_jogador(jogador) for jogador in nomes):
+        return 1
 
+    data_horario = datetime.now()
     banco = banco_de_dados.abre_acesso()
     sql_partida = """INSERT Partida VALUES (%s, %s)"""
     banco['cursor'].execute(sql_partida, (data_horario, 'andamento'))
     banco_de_dados.fecha_acesso(banco)
+
+    for jogador in nomes:
+        cod_retorno = tabela.cria_tabela(jogador, data_horario) 
 
     shuffle(nomes)
     partida_atual['data_horario'] = data_horario
