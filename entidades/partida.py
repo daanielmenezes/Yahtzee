@@ -51,11 +51,18 @@
 #  passar o turno. Agora ela passa o turno e depois remove o jogador.
 #  O bug ocorria porque achar o proximo jogador depende do jogador do
 #  turno atual.
+#
+#---------------------------v0.6.0: 29/05/2020------------------------
+#  Por: Daniel Menezes
+#  Implementada parcialmente salva_partida passando nos testes.
+#  A função salva os dados da partida mas não salva as tabelas ainda.
+#  Passando nos testes.
+#
 #######################################################################
 
 from datetime import datetime
 from random import shuffle
-from os.path import isdir
+from os.path import isdir, join
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement, Comment
 from xml.dom import minidom
@@ -67,7 +74,7 @@ from funcionalidades import combinacao
 from unittest import mock
 
 __all__ = ['inicia_partida', 'faz_lancamento', 'marca_pontuacao', 'desiste',
-        'obtem_partidas']
+        'obtem_partidas', 'salva_partida']
 
 
 partida_atual = {}
@@ -335,20 +342,33 @@ def salva_partida(path):
         return 2
     
     elem_partida = Element('partida')
-    for key, value in partida_atual:
+    for key, value in partida_atual.items():
+        if key in ('salva', 'status'):
+            continue
+
+        sub_elem = SubElement(elem_partida, key)
         if key == 'jogadores':
-            elem_jogadores = SubElement(elem_partida, 'jogadores')
             for nome_jogador in value:
-                elem_nome = SubElement(elem_jogadores)
+                elem_nome = SubElement(sub_elem, 'nome')
                 elem_nome.text = nome_jogador
-        elif key == 'salva':
-            pass
+        elif key == 'combinacao':
+            for dado in value:
+                elem_dado = SubElement(sub_elem, 'dado')
+                elem_dado.text = str(dado)
+        elif key == 'pts_combinacao':
+            for categoria in value:
+                elem_categoria = SubElement(sub_elem, 'categoria')
+                elem_categoria_nome = SubElement(elem_categoria, 'nome')
+                elem_categoria_pontuacao = SubElement(elem_categoria,
+                        'pontuacao')
+                elem_categoria_nome.text = categoria['nome']
+                elem_categoria_pontuacao.text = str(categoria['pontuacao'])
         else:
-            elem_atributo = SubElement(elem_partida, key)
-            elem_atributo.text = str(value)
+            sub_elem.text = str(value)
 
     arquivo_nome = partida_atual['data_horario'].strftime('%Y%m%d%H%M%S%f')
-    with open(os.path.join(path,arquivo_nome)) as xml_file:
+    arquivo_nome += ".xml"
+    with open(join(path,arquivo_nome), 'w') as xml_file:
         rough_string = ElementTree.tostring(elem_partida, 'utf-8')
         reparsed = minidom.parseString(rough_string)
         final_string = reparsed.toprettyxml(indent="  ")

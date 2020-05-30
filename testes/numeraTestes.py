@@ -15,6 +15,7 @@ output = open(os.path.join( base, os.pardir, 'testes.py'), 'w')
 
 output.write( "import mysql.connector\n" )
 output.write( "import unittest\n" )
+output.write( "from os import path\n" )
 output.write( "from datetime import datetime\n" )
 output.write( "from entidades import *\n" )
 output.write( "from funcionalidades import *\n" )
