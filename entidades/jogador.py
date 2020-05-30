@@ -62,7 +62,6 @@ def insere(nome):
         bd.fecha_acesso(banco)
         return 2
 
-    banco['cursor'].execute("select nome from Jogador")
     data = datetime.now().date()            #data de hoje
     ranking = None
     pontuacao = recorde = 0
