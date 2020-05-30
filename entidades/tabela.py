@@ -32,13 +32,13 @@ def cria_tabela(nome_jogador, data_horario):
     if not jogador.valida_jogador(nome_jogador):
         return 1
 
-    sqlSearch_tab = ''' SELECT * FROM tabela
+    sqlSearch_tab = ''' SELECT * FROM Tabela
     WHERE nome_jogador = %s AND data_horario = %s'''
-    sqlSearch_tab_pont = ''' SELECT * FROM tabela_pontuacao
+    sqlSearch_tab_pont = ''' SELECT * FROM Tabela_Pontuacao
     WHERE nome_jogador = %s AND data_horario = %s'''
 
-    sqlInsert_tab = ''' INSERT INTO tabela VALUES (%s,%s,%s,%s,%s) '''
-    sqlInsert_tab_pont = ''' INSERT INTO tabela_pontuacao VALUES (%s,%s,%s,%s) '''
+    sqlInsert_tab = ''' INSERT INTO Tabela VALUES (%s,%s,%s,%s,%s) '''
+    sqlInsert_tab_pont = ''' INSERT INTO Tabela_Pontuacao VALUES (%s,%s,%s,%s) '''
 
     banco = bd.abre_acesso()
     
@@ -83,9 +83,9 @@ def cria_tabela(nome_jogador, data_horario):
 ############################################################################
 
 def registra_desistencia(nome_jogador, data_horario):
-    sqlSearch_tabela = ''' SELECT * FROM tabela
+    sqlSearch_tabela = ''' SELECT * FROM Tabela
                            WHERE nome_jogador = %s AND data_horario = %s'''
-    sqlSearch_tab_pontuacao = ''' SELECT pontuacao FROM tabela_pontuacao
+    sqlSearch_tab_pontuacao = ''' SELECT pontuacao FROM Tabela_Pontuacao
                               WHERE nome_jogador = %s AND data_horario = %s'''
     
     banco = bd.abre_acesso()
