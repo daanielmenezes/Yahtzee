@@ -308,15 +308,13 @@ def obtem_partidas(data_horario = [], status = []):
     
     banco = banco_de_dados.abre_acesso()
     if data_horario:
-        sqlBusca += ' WHERE data_horario in (%s'+\
-                    ((len(data_horario)-1)*',%s') + ')'
+        sqlBusca += ' WHERE data_horario in (%s{})'.format(
+                                                (len(data_horario)-1)*',%s')
         if status:
-            sqlBusca += ' AND status in (%s' +\
-                        ((len(status)-1)*',%s') + ')'
+            sqlBusca += ' AND status in (%s{})'.format((len(status)-1)*',%s')
         banco['cursor'].execute(sqlBusca, tuple(data_horario+status))
     elif status:
-        sqlBusca += ' WHERE status in (%s'+\
-                    ((len(status)-1)*',%s') + ')'
+        sqlBusca += ' WHERE status in (%s{})'.format((len(status)-1)*',%s')
         banco['cursor'].execute(sqlBusca, status)
     else:
         banco['cursor'].execute(sqlBusca)
