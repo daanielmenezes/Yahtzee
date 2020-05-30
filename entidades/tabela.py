@@ -11,6 +11,15 @@
 #  funcao cria_tabela implementada e passando nos testes
 #  funcao registra_desistencia implementada p/ condicoes de retorno 1 e 2
 #
+#---------------------------v0.1.1: 30/05/2020-------------------------
+#  Por: Daniel Menezes
+#  cria_tabela: verificação de categoria não marcada feita com (== None)
+#    já que 0 também é falso em python mas tem significado diferente no
+#    contexto.
+#
+#  mudadas algumas letras dos nomes das relações em maiúsculo para ficar
+#    compatível com o nome de criação (deu problemas na execução pra mim)
+
 
 from entidades import jogador
 from entidades import categoria
@@ -97,7 +106,7 @@ def registra_desistencia(nome_jogador, data_horario):
     tuplas = banco['cursor'].fetchall()
     todas_tuplas_preenchidas = True
     for tupla in tuplas:
-        if not tupla['pontuacao']:
+        if tupla['pontuacao'] == None:
             todas_tuplas_preenchidas = False
     if todas_tuplas_preenchidas:
         return 2
