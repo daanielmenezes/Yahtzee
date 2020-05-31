@@ -96,6 +96,10 @@ def registra_desistencia(nome_jogador, data_horario):
                            WHERE nome_jogador = %s AND data_horario = %s'''
     sqlSearch_tab_pontuacao = ''' SELECT pontuacao FROM Tabela_Pontuacao
                               WHERE nome_jogador = %s AND data_horario = %s'''
+    sqlUpdate_tabela = ''' UPDATE Tabela SET desistencia = True
+                           WHERE data_horario = %s AND nome_jogador = %s'''
+    sqlUpdate_tab_pontuacao = ''' UPDATE Tabela_Pontuacao SET pontuacao = 0
+                           WHERE data_horario = %s AND nome_jogador = %s'''
     
     banco = bd.abre_acesso()
     banco['cursor'].execute(sqlSearch_tabela,(nome_jogador, data_horario))
@@ -110,5 +114,8 @@ def registra_desistencia(nome_jogador, data_horario):
             todas_tuplas_preenchidas = False
     if todas_tuplas_preenchidas:
         return 2
+    banco['cursor'].execute(sqlUpdate_tabela,(data_horario, nome_jogador))
+    banco['cursor'].execute(sqlUpdate_tab_pontuacao,(data_horario, nome_jogador))
     #falta zerar as categorias nao pontuadas
+    bd.fecha_acesso(banco)
     return 0
