@@ -11,6 +11,15 @@
 #  funcao cria_tabela implementada e passando nos testes
 #  funcao registra_desistencia implementada p/ condicoes de retorno 1 e 2
 #
+#---------------------------v0.1.1: 30/05/2020-------------------------
+#  Por: Daniel Menezes
+#  cria_tabela: verificação de categoria não marcada feita com (== None)
+#    já que 0 também é falso em python mas tem significado diferente no
+#    contexto.
+#
+#  mudadas algumas letras dos nomes das relações em maiúsculo para ficar
+#    compatível com o nome de criação (deu problemas na execução pra mim)
+
 
 from entidades import jogador
 from entidades import categoria
@@ -32,13 +41,13 @@ def cria_tabela(nome_jogador, data_horario):
     if not jogador.valida_jogador(nome_jogador):
         return 1
 
-    sqlSearch_tab = ''' SELECT * FROM tabela
+    sqlSearch_tab = ''' SELECT * FROM Tabela
     WHERE nome_jogador = %s AND data_horario = %s'''
-    sqlSearch_tab_pont = ''' SELECT * FROM tabela_pontuacao
+    sqlSearch_tab_pont = ''' SELECT * FROM Tabela_Pontuacao
     WHERE nome_jogador = %s AND data_horario = %s'''
 
-    sqlInsert_tab = ''' INSERT INTO tabela VALUES (%s,%s,%s,%s,%s) '''
-    sqlInsert_tab_pont = ''' INSERT INTO tabela_pontuacao VALUES (%s,%s,%s,%s) '''
+    sqlInsert_tab = ''' INSERT INTO Tabela VALUES (%s,%s,%s,%s,%s) '''
+    sqlInsert_tab_pont = ''' INSERT INTO Tabela_Pontuacao VALUES (%s,%s,%s,%s) '''
 
     banco = bd.abre_acesso()
     
@@ -83,9 +92,9 @@ def cria_tabela(nome_jogador, data_horario):
 ############################################################################
 
 def registra_desistencia(nome_jogador, data_horario):
-    sqlSearch_tabela = ''' SELECT * FROM tabela
+    sqlSearch_tabela = ''' SELECT * FROM Tabela
                            WHERE nome_jogador = %s AND data_horario = %s'''
-    sqlSearch_tab_pontuacao = ''' SELECT pontuacao FROM tabela_pontuacao
+    sqlSearch_tab_pontuacao = ''' SELECT pontuacao FROM Tabela_Pontuacao
                               WHERE nome_jogador = %s AND data_horario = %s'''
     
     banco = bd.abre_acesso()
@@ -97,7 +106,7 @@ def registra_desistencia(nome_jogador, data_horario):
     tuplas = banco['cursor'].fetchall()
     todas_tuplas_preenchidas = True
     for tupla in tuplas:
-        if not tupla['pontuacao']:
+        if tupla['pontuacao'] == None:
             todas_tuplas_preenchidas = False
     if todas_tuplas_preenchidas:
         return 2
