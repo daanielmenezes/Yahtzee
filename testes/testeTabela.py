@@ -26,7 +26,7 @@ class Testmock(unittest.TestCase):
         print("Caso de Teste AAA - Verifica criacao de tabela")
         temp = tabela.obtem_tabelas(['eduardo'], [datetime(2020,2,2,10)])
         self.assertEqual((temp[0]['nome_jogador'],
-                          temp[0]['data_horario_partida'],
+                          temp[0]['data_horario'],
                           temp[0]['pontuacao_total']),
                          ('eduardo',datetime(2020,2,2,10),0))
 
@@ -142,7 +142,7 @@ class Testmock(unittest.TestCase):
         temp = tabela.obtem_tabelas(['eduardo'],[datetime(2020,2,2,10)])
         n_categorias = len(categorias.obtem_nomes())
         self.assertEqual((temp[0]['nome_jogador'],
-                          temp[0]['data_horario_partida'],
+                          temp[0]['data_horario'],
                           temp[0]['pontuacao_total'],
                           temp[0]['desistencia']),
                          ('eduardo',datetime(2020,2,2,10),30 * n_categorias,True))

@@ -193,6 +193,75 @@ def insere_pontuacao(nome_jogador, data_horario, categoria, pontuacao):
     bd.fecha_acesso(banco)
     return 0
 
+############################################################
+# Remove a tabela de um jogador em uma partida
+# nome_jogador: nome do jogador a buscar.
+# data_horario: partida a buscar.
+# retorna 0 em caso de sucesso
+# ou retorna 1 se a tabela do jogador na partida não existir
+############################################################
+
+def remove(nome_jogador, data_horario):
+    sqlDelete_tab_pont = ''' DELETE FROM Tabela_Pontuacao
+                         WHERE data_horario = %s AND nome_jogador = %s'''
+    sqlDelete_tabela = ''' DELETE FROM Tabela
+                         WHERE data_horario = %s AND nome_jogador = %s'''
+    
+    banco = bd.abre_acesso()
+    if not _tabela_jogador_partida_existe(banco, nome_jogador, data_horario)\
+       or not _tab_pont_jogador_partida_existe(banco, nome_jogador, data_horario):
+        return 1
+    
+    banco['cursor'].execute(sqlDelete_tab_pont, (data_horario, nome_jogador))
+    banco['cursor'].execute(sqlDelete_tabela, (data_horario, nome_jogador))
+
+    bd.fecha_acesso(banco)
+    return 0
+
+##############################################################################
+# Gera informações sobre todos os jogadores de nomes nas partidas 
+# data_horarios
+# nomes:lista de nomes dos jogadores a filtrar. Caso vazia, considera-se todos
+# os jogadores que possuem uma tabela.
+# data_horarios: lista com data_horario de cada partida a ser filtrada. Caso 
+# vazia, considera-se todas as partidas que possuem tabela.
+# retorna, em caso de sucesso, uma lista de dicionários do tipo:
+# {“nome_jogador”, 
+#  ”data_horario”, 
+#  “pontos_por_categoria”,
+#  “pontuacao_total”, 
+#  “colocacao”,
+#  “desistencia”
+# }
+#
+# “pontos_por_categoria” : lista de dicionários com a pontuação do jogador na
+# partida em cada categoria da forma:
+# [ { “nome”: <nome_da_categoria1>, “pontuacao”: <pontuacao_na_categoria_1> },
+#   { “nome”: <nome_da_categoria2>, “pontuacao”: <pontuacao_na_categoria_2> },
+#   { “nome”: <nome_da_categoria3>, “pontuacao”: <pontuacao_na_categoria_3> }
+#  ... ]
+#  As categorias ainda não pontuadas terão <pontuacao_na_categoria> = None.
+#
+# ou retorna 1 se a lista de nomes possuir um nome inválido
+# ou retorna 2 se a lista de data_horario possuir uma data_horario inválida
+##############################################################################
+
+def obtem_tabelas(nomes, data_horarios):
+    sqlSearch = ''' select colocacao as c, * from Tabela'''
+    banco = bd.abre_acesso()
+    banco['cursor'].execute(sqlSearch)
+    t = banco['cursor'].fetchall()
+    print(t)
+    print(type(t))
+    [{'data_horario': datetime.datetime(2020, 2, 2, 10, 0), 'nome_jogador': 'eduardo', 'pontuacao_total': 30, 'colocacao': 1, 'desistencia': 0},
+     {'data_horario': datetime.datetime(2020, 2, 2, 10, 0), 'nome_jogador': 'jorge', 'pontuacao_total': 0, 'colocacao': None, 'desistencia': 1}]
+    bd.fecha_acesso(banco)
+
+    sqlAux = ''' SELECT data_horario FROM Tabela_Pontuacao
+                 WHERE data_horario = %s '''
+    for i in range(data_horarios - 1):
+        sqlAux += 'OR data_horario = %s '''
+        #fazer where nome in(aux) and data_horario in(aux 2)
 
 
 
