@@ -1,4 +1,4 @@
-#######################################################################
+########################################################################
 # MODULO TABELA
 #
 #  Cria tabelas de pontos com base nas regras de pontuação das categorias
@@ -25,7 +25,40 @@ from entidades import jogador
 from entidades import categoria
 import funcionalidades.banco_de_dados as bd
 
-__all__ = ['cria_tabela', 'registra_desistencia']
+__all__ = ['cria_tabela', 'insere_pontuacao', 'registra_desistencia']
+
+def _atualiza_colocacao(conexao, data_horario):
+    sqlUpdate = '''
+       WITH aux (data_horario, nome_jogador, coloc) as (
+          SELECT data_horario, nome_jogador, rank() OVER(
+                                            ORDER BY pontuacao_total DESC )
+                                            as coloc
+          FROM Tabela
+          WHERE data_horario = %s)
+       UPDATE Tabela, aux
+       SET Tabela.colocacao = aux.coloc
+       WHERE Tabela.data_horario = aux.data_horario
+       AND Tabela.nome_jogador = aux.nome_jogador '''
+    
+    conexao['cursor'].execute(sqlUpdate, (data_horario,))
+    return
+
+def _tabela_jogador_partida_existe(conexao, jogador, data_horario):
+    sqlSearch_tabela = ''' SELECT * FROM Tabela
+                           WHERE nome_jogador = %s AND data_horario = %s'''
+    conexao['cursor'].execute(sqlSearch_tabela,(jogador, data_horario))
+    if (conexao['cursor'].rowcount > 0):
+        return True
+    return False
+    
+
+def _tab_pont_jogador_partida_existe(conexao, jogador, data_horario):
+    sqlSearch_tab_pont = ''' SELECT * FROM Tabela_Pontuacao
+                         WHERE nome_jogador = %s AND data_horario = %s'''
+    conexao['cursor'].execute(sqlSearch_tab_pont,(jogador, data_horario))
+    if (conexao['cursor'].rowcount > 0):
+        return True
+    return False
 
 #####################################################################
 # Cria e armazena uma nova tabela com pontuação zerada 
@@ -41,23 +74,16 @@ def cria_tabela(nome_jogador, data_horario):
     if not jogador.valida_jogador(nome_jogador):
         return 1
 
-    sqlSearch_tab = ''' SELECT * FROM Tabela
-    WHERE nome_jogador = %s AND data_horario = %s'''
-    sqlSearch_tab_pont = ''' SELECT * FROM Tabela_Pontuacao
-    WHERE nome_jogador = %s AND data_horario = %s'''
-
     sqlInsert_tab = ''' INSERT INTO Tabela VALUES (%s,%s,%s,%s,%s) '''
     sqlInsert_tab_pont = ''' INSERT INTO Tabela_Pontuacao VALUES (%s,%s,%s,%s) '''
 
     banco = bd.abre_acesso()
-    
-    banco['cursor'].execute( sqlSearch_tab, (nome_jogador, data_horario) )
-    if (banco['cursor'].rowcount > 0): #jogador já registrado
+
+    if _tabela_jogador_partida_existe(banco, nome_jogador, data_horario):
         bd.fecha_acesso(banco)
         return 2
-    
-    banco['cursor'].execute( sqlSearch_tab_pont, (nome_jogador, data_horario) )
-    if (banco['cursor'].rowcount > 0): #jogador já registrado
+
+    if _tab_pont_jogador_partida_existe(banco, nome_jogador, data_horario):
         bd.fecha_acesso(banco)
         return 2
 
@@ -92,8 +118,6 @@ def cria_tabela(nome_jogador, data_horario):
 ############################################################################
 
 def registra_desistencia(nome_jogador, data_horario):
-    sqlSearch_tabela = ''' SELECT * FROM Tabela
-                           WHERE nome_jogador = %s AND data_horario = %s'''
     sqlSearch_tab_pontuacao = ''' SELECT pontuacao FROM Tabela_Pontuacao
                               WHERE nome_jogador = %s AND data_horario = %s'''
     sqlUpdate_tabela = ''' UPDATE Tabela SET desistencia = True
@@ -102,8 +126,8 @@ def registra_desistencia(nome_jogador, data_horario):
                            WHERE data_horario = %s AND nome_jogador = %s'''
     
     banco = bd.abre_acesso()
-    banco['cursor'].execute(sqlSearch_tabela,(nome_jogador, data_horario))
-    if (banco['cursor'].rowcount == 0):
+    if not _tabela_jogador_partida_existe(banco, nome_jogador, data_horario)\
+       or not _tab_pont_jogador_partida_existe(banco, nome_jogador, data_horario):
         return 1
 
     banco['cursor'].execute(sqlSearch_tab_pontuacao,(nome_jogador, data_horario))
@@ -112,10 +136,69 @@ def registra_desistencia(nome_jogador, data_horario):
     for tupla in tuplas:
         if tupla['pontuacao'] == None:
             todas_tuplas_preenchidas = False
+            break
     if todas_tuplas_preenchidas:
         return 2
+    
     banco['cursor'].execute(sqlUpdate_tabela,(data_horario, nome_jogador))
     banco['cursor'].execute(sqlUpdate_tab_pontuacao,(data_horario, nome_jogador))
-    #falta zerar as categorias nao pontuadas
+    
     bd.fecha_acesso(banco)
     return 0
+
+################################################################
+# Soma uma quantidade de pontos a uma categoria para um jogador.
+# nome_jogador: nome do jogador,
+# categoria: nome da categoria e  
+# pontuacao: quantidade de pontos (Inteiro maior que 0).
+# data_horario: data_horario da partida.
+# Retorna 0 em caso de sucesso,
+# ou retorna 1 se a tabela do jogador na partida não existir
+# ou retorna 2 se a categoria não existir
+# ou retorna 3 se a quantidade de pontos for negativa
+# ou retorna 4 se o jogador já marcou pontos nessa categoria
+################################################################
+
+def insere_pontuacao(nome_jogador, data_horario, categoria, pontuacao):
+    sqlSearch_Categoria = ''' SELECT nome_categoria FROM Tabela_Pontuacao
+                          WHERE nome_categoria = %s'''
+    sqlSearch_Pontos = ''' SELECT pontuacao FROM Tabela_Pontuacao
+                       WHERE nome_categoria = %s
+                       AND nome_jogador = %s AND data_horario = %s'''
+    sqlUpdate_tab_pont = ''' UPDATE Tabela_Pontuacao SET pontuacao = %s
+                           WHERE data_horario = %s AND nome_jogador = %s
+                           AND nome_categoria = %s'''
+    sqlUpdate_tabela = ''' UPDATE Tabela SET pontuacao_total = pontuacao_total + %s
+                       WHERE data_horario = %s AND nome_jogador = %s'''
+    
+    if pontuacao < 0:
+        return 3
+    
+    banco = bd.abre_acesso()
+    if not _tab_pont_jogador_partida_existe(banco, nome_jogador, data_horario):
+        return 1
+    banco['cursor'].execute(sqlSearch_Categoria, (categoria,))
+    if banco['cursor'].rowcount == 0:
+        return 2
+    banco['cursor'].execute(sqlSearch_Pontos, (categoria,nome_jogador,data_horario))
+    pontuacao_bd = banco['cursor'].fetchone()
+    if pontuacao_bd['pontuacao'] is not None:
+        return 4
+    banco['cursor'].execute(sqlUpdate_tab_pont, (pontuacao, data_horario,
+                                               nome_jogador, categoria))
+    banco['cursor'].execute(sqlUpdate_tabela, (pontuacao, data_horario,
+                                               nome_jogador))
+    _atualiza_colocacao(banco, data_horario)
+    
+    bd.fecha_acesso(banco)
+    return 0
+
+
+
+
+
+
+
+
+
+
