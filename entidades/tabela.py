@@ -25,7 +25,8 @@ from entidades import jogador
 from entidades import categoria
 import funcionalidades.banco_de_dados as bd
 
-__all__ = ['cria_tabela', 'insere_pontuacao', 'registra_desistencia']
+__all__ = ['cria_tabela', 'insere_pontuacao', 'registra_desistencia', 'remove',
+           'obtem_tabelas']
 
 def _atualiza_colocacao(conexao, data_horario):
     sqlUpdate = '''
@@ -59,6 +60,72 @@ def _tab_pont_jogador_partida_existe(conexao, jogador, data_horario):
     if (conexao['cursor'].rowcount > 0):
         return True
     return False
+
+def sql_aux_obtem_data_horario(data_horarios):
+    sqlAux = """(SELECT data_horario
+                        FROM Tabela
+                        WHERE data_horario = '""" + str(data_horarios[0]) + "'"
+    
+    for data in data_horarios[1:]:
+        sqlAux += " OR data_horario = " + "'" + data + "'"
+    sqlAux +=")"
+    return sqlAux
+
+def sql_aux_obtem_nome(nomes):
+    sqlAux = """(SELECT nome_jogador
+                           FROM Tabela
+                           WHERE nome_jogador = '""" + nomes[0] + "'"
+    
+    for nome in nomes[1:]:
+        sqlAux += " OR nome_jogador = " + "'" + nome + "'"
+    sqlAux +=")"
+    return sqlAux
+
+def obtem_tab_ambas_vazias(conexao):
+    sqlSearch = '''
+                SELECT *
+                FROM Tabela
+                '''
+    conexao['cursor'].execute(sqlSearch)
+    return conexao['cursor'].fetchall()
+
+def obtem_tab_nomes_vazia(conexao, data_horarios):
+    sqlSearch_Tabela = '''
+                       SELECT *
+                       FROM Tabela
+                       WHERE data_horario IN %s
+                       '''
+    sqlAux = sql_aux_obtem_data_horario(data_horarios)
+    
+    sqlSearch_Tabela = sqlSearch_Tabela % (sqlAux)
+    conexao['cursor'].execute(sqlSearch_Tabela)
+    return conexao['cursor'].fetchall()
+
+def obtem_tab_datas_vazia(conexao, nomes):
+    sqlSearch_Tabela = '''
+                       SELECT *
+                       FROM Tabela
+                       WHERE nome_jogador IN %s
+                       '''
+    sqlAux = sql_aux_obtem_nome(nomes)
+    
+    sqlSearch_Tabela = sqlSearch_Tabela % (sqlAux)
+    conexao['cursor'].execute(sqlSearch_Tabela)
+    return conexao['cursor'].fetchall()
+
+def obtem_tab_nenhuma_vazia(conexao, nomes, data_horarios):
+    sqlSearch_Tabela = '''
+                       SELECT *
+                       FROM Tabela
+                       WHERE data_horario IN %s
+                       AND nome_jogador IN %s
+                       '''
+    
+    sqlAux_nome = sql_aux_obtem_nome(nomes)
+    sqlAux_data = sql_aux_obtem_data_horario(data_horarios)
+    sqlSearch_Tabela = sqlSearch_Tabela % (sqlAux_data, sqlAux_nome)
+    conexao['cursor'].execute(sqlSearch_Tabela)
+    return conexao['cursor'].fetchall()
 
 #####################################################################
 # Cria e armazena uma nova tabela com pontuação zerada 
@@ -245,29 +312,36 @@ def remove(nome_jogador, data_horario):
 # ou retorna 1 se a lista de nomes possuir um nome inválido
 # ou retorna 2 se a lista de data_horario possuir uma data_horario inválida
 ##############################################################################
-
+    
 def obtem_tabelas(nomes, data_horarios):
-    sqlSearch = ''' select colocacao as c, * from Tabela'''
     banco = bd.abre_acesso()
-    banco['cursor'].execute(sqlSearch)
-    t = banco['cursor'].fetchall()
-    print(t)
-    print(type(t))
-    [{'data_horario': datetime.datetime(2020, 2, 2, 10, 0), 'nome_jogador': 'eduardo', 'pontuacao_total': 30, 'colocacao': 1, 'desistencia': 0},
-     {'data_horario': datetime.datetime(2020, 2, 2, 10, 0), 'nome_jogador': 'jorge', 'pontuacao_total': 0, 'colocacao': None, 'desistencia': 1}]
+    
+    if nomes == [] and data_horarios == []:
+        tuplas_tabela = obtem_tab_ambas_vazias(banco)
+    elif nomes == []:
+        tuplas_tabela = obtem_tab_nomes_vazia(banco, data_horarios)
+        if tuplas_tabela == []:
+            return 1
+    elif data_horarios == []:
+        tuplas_tabela = obtem_tab_datas_vazia(banco, nomes)
+        if tuplas_tabela == []:
+            return 1
+    else:
+        tuplas_tabela = obtem_tab_nenhuma_vazia(banco, nomes, data_horarios)
+        if tuplas_tabela == []:
+            return 1
+
+    sqlSearch_tab_pont = ''' SELECT nome_categoria as nome, pontuacao
+                         FROM Tabela_Pontuacao
+                         WHERE data_horario = %s
+                         AND nome_jogador = %s'''
+    
+    for elemento in tuplas_tabela:
+        banco['cursor'].execute(
+            sqlSearch_tab_pont, (elemento['data_horario'],
+                                 elemento['nome_jogador']))
+        lista_pontos_categoria = banco['cursor'].fetchall()
+        elemento['pontos_por_categoria'] = lista_pontos_categoria
+                 
     bd.fecha_acesso(banco)
-
-    sqlAux = ''' SELECT data_horario FROM Tabela_Pontuacao
-                 WHERE data_horario = %s '''
-    for i in range(data_horarios - 1):
-        sqlAux += 'OR data_horario = %s '''
-        #fazer where nome in(aux) and data_horario in(aux 2)
-
-
-
-
-
-
-
-
-
+    return tuplas_tabela

@@ -339,6 +339,7 @@ class Test(unittest.TestCase):
                           temp[0]['data_horario'],
                           temp[0]['pontuacao_total']),
                          ('eduardo',datetime(2020,2,2,10),0))
+        temp = tabela.obtem_tabelas(['eduardo'], [])
 
     def test_045_cria_tabela_nok_nome_inexistente(self):
         print("Caso de Teste 045 - Impede criacao de tabela caso" +
@@ -420,7 +421,7 @@ class Test(unittest.TestCase):
         for categ in pontos_categ:
             if categ['pontuacao']!=0:
                 zeradas = False
-        assertTrue(zeradas)
+        self.assertTrue(zeradas)
 
     def test_055_registra_desistencia_ok_desiste_com_sucesso(self):
         print("Caso de Teste 055 - Verifica desistencia")
@@ -450,7 +451,7 @@ class Test(unittest.TestCase):
     def test_058_obtem_tabelas_ok(self):
         print("Caso de Teste 058 - Obter tabelas de jogadores nas partidas")
         temp = tabela.obtem_tabelas(['eduardo'],[datetime(2020,2,2,10)])
-        n_categorias = len(categorias.obtem_nomes())
+        n_categorias = len(categoria.obtem_nomes())
         self.assertEqual((temp[0]['nome_jogador'],
                           temp[0]['data_horario'],
                           temp[0]['pontuacao_total'],
@@ -486,7 +487,7 @@ class Test(unittest.TestCase):
         print("Caso de Teste 063 - Verifica remocao")
         retorno_esperado = tabela.obtem_tabelas(['eduardo'],
                                                 [datetime(2020,2,2,10)])
-        self.assertEqual(retorno_esperado, [])
+        self.assertEqual(retorno_esperado, 1)
 
     def test_064_remove_nok_tabela_nao_existe(self):
         print("Caso de Teste 064 - impede remocao caso tabela" +

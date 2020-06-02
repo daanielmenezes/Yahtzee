@@ -110,7 +110,7 @@ class Testmock(unittest.TestCase):
         for categ in pontos_categ:
             if categ['pontuacao']!=0:
                 zeradas = False
-        assertTrue(zeradas)
+        self.assertTrue(zeradas)
 
     def test_AAA_registra_desistencia_ok_desiste_com_sucesso(self):
         print("Caso de Teste AAA - Verifica desistencia")
@@ -140,7 +140,7 @@ class Testmock(unittest.TestCase):
     def test_AAA_obtem_tabelas_ok(self):
         print("Caso de Teste AAA - Obter tabelas de jogadores nas partidas")
         temp = tabela.obtem_tabelas(['eduardo'],[datetime(2020,2,2,10)])
-        n_categorias = len(categorias.obtem_nomes())
+        n_categorias = len(categoria.obtem_nomes())
         self.assertEqual((temp[0]['nome_jogador'],
                           temp[0]['data_horario'],
                           temp[0]['pontuacao_total'],
@@ -176,7 +176,7 @@ class Testmock(unittest.TestCase):
         print("Caso de Teste AAA - Verifica remocao")
         retorno_esperado = tabela.obtem_tabelas(['eduardo'],
                                                 [datetime(2020,2,2,10)])
-        self.assertEqual(retorno_esperado, [])
+        self.assertEqual(retorno_esperado, 1)
 
     def test_AAA_remove_nok_tabela_nao_existe(self):
         print("Caso de Teste AAA - impede remocao caso tabela" +
