@@ -79,11 +79,11 @@ __all__ = ['inicia_partida', 'faz_lancamento', 'marca_pontuacao', 'desiste',
 partida_atual = {}
 
 #MOCKS:
-tabela.insere_pontuacao_mock = mock.Mock()
+#tabela.insere_pontuacao_mock = mock.Mock()
 tabela.obtem_tabelas_mock = mock.Mock()
 tabela.registra_desistencia_mock = mock.Mock()
 #tabela.cria_tabela.side_effect = [1, 0, 0, 0]
-tabela.insere_pontuacao_mock.side_effect = [0,4]
+#tabela.insere_pontuacao_mock.side_effect = [0,4]
 tabela.obtem_tabelas_mock.side_effect = [
        [{'nome_jogador':'flavio', 
          'data_horario_partida':None, 
@@ -264,7 +264,7 @@ def marca_pontuacao(categoria):
             partida_atual['data_horario'],
             categoria,
             pontos]
-    ret_insere = tabela.insere_pontuacao_mock(*args)
+    ret_insere = tabela.insere_pontuacao(*args)
 
     if ret_insere == 4:
         return 4
