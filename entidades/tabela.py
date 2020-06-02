@@ -1,9 +1,14 @@
 ########################################################################
 # MODULO TABELA
 #
-#  Cria tabelas de pontos com base nas regras de pontuação das categorias
-#  Cada tabela armazena quantos pontos cada jogador possui em cada
-#  categoria para cada partida.
+#  Responsável por manipular as cartelas dos jogadores, armazenando
+#  as informações referentes a sua pontuação e a sua participação
+#  em cada partida. Implementada com duas relações no banco
+#  de dados: Tabela, que armazena a pontuação total, colocação e
+#  desistência (booleano) dos jogadores para cada partida, e
+#  Tabela_Pontuacao, que armazena a pontuação correspondente a cada
+#  categoria dos jogadores nas partidas. Essas duas relações já estão
+#  criadas separadamente.
 #
 #
 #---------------------------v0.1.0: 29/05/2020-------------------------
@@ -19,6 +24,24 @@
 #
 #  mudadas algumas letras dos nomes das relações em maiúsculo para ficar
 #    compatível com o nome de criação (deu problemas na execução pra mim)
+#
+#---------------------------v0.2.0: 31/05/2020-------------------------
+#  Por: Bruno Coutinho
+#
+#  funções remove e insere_pontuacao implementadas, pequenos erros corrigidos
+#  e registra_desistencia completada
+#
+#---------------------------v1.0.0: 01/06/2020-------------------------
+#  Por: Bruno Coutinho
+#
+#  função obtem_tabelas implementada com sucesso, todas as funções passando
+#  nos testes
+#
+#---------------------------v1.0.1: 02/06/2020-------------------------
+#  Por: Bruno Coutinho
+#
+#  código mais organizado e documentado, modificação de algumas descrições
+#  de funções
 
 
 from entidades import jogador
@@ -27,6 +50,11 @@ import funcionalidades.banco_de_dados as bd
 
 __all__ = ['cria_tabela', 'insere_pontuacao', 'registra_desistencia', 'remove',
            'obtem_tabelas']
+
+
+########################### funções auxiliares ###############################
+
+## função auxiliar à função de acesso insere_pontuacao:
 
 def _atualiza_colocacao(conexao, data_horario):
     sqlUpdate = '''
@@ -44,6 +72,9 @@ def _atualiza_colocacao(conexao, data_horario):
     conexao['cursor'].execute(sqlUpdate, (data_horario,))
     return
 
+## função auxiliar para ver se as informações do jogador na partida
+## especificada já estão na relação Tabela do banco de dados
+
 def _tabela_jogador_partida_existe(conexao, jogador, data_horario):
     sqlSearch_tabela = ''' SELECT * FROM Tabela
                            WHERE nome_jogador = %s AND data_horario = %s'''
@@ -52,6 +83,8 @@ def _tabela_jogador_partida_existe(conexao, jogador, data_horario):
         return True
     return False
     
+## função auxiliar para ver se as informações do jogador na partida
+## especificada já estão na relação Tabela_Pontuacao do banco de dados
 
 def _tab_pont_jogador_partida_existe(conexao, jogador, data_horario):
     sqlSearch_tab_pont = ''' SELECT * FROM Tabela_Pontuacao
@@ -60,6 +93,8 @@ def _tab_pont_jogador_partida_existe(conexao, jogador, data_horario):
     if (conexao['cursor'].rowcount > 0):
         return True
     return False
+
+## funções auxiliares à função de acesso obtem_tabelas:
 
 def sql_aux_obtem_data_horario(data_horarios):
     sqlAux = """(SELECT data_horario
@@ -127,9 +162,16 @@ def obtem_tab_nenhuma_vazia(conexao, nomes, data_horarios):
     conexao['cursor'].execute(sqlSearch_Tabela)
     return conexao['cursor'].fetchall()
 
+
+####################### funções de acesso ###########################
+
+
 #####################################################################
-# Cria e armazena uma nova tabela com pontuação zerada 
-# e associada a um jogador e a uma partida.
+# Cria e armazena uma nova tabela(cartela) com pontuação zerada 
+# e associada a um jogador e a uma partida. Nessa implementação com
+# banco de dados, inserimos nas relações Tabela e Tabela_Pontuacao
+# tuplas correspondentes ao jogador e partida informados, com pontuacao
+# zerada.
 # nome_jogador: nome do jogador a ser associado à tabela
 # data_horario: identificador data_horario da partida a ser associada
 # retorna 0 em caso de sucesso
@@ -175,8 +217,8 @@ def cria_tabela(nome_jogador, data_horario):
 
 ############################################################################
 # Zera todos os pontos de todas as categorias ainda não pontuadas na tabela
-#de um jogador para a partida data_horario e marca desistência na informação
-#da tabela.
+# de um jogador para a partida data_horario e marca desistência na informação
+# da tabela.
 # nome_jogador: nome do jogador.
 # data_horario:  data_horario da partida.
 # retorna 0 em caso de sucesso
@@ -214,9 +256,10 @@ def registra_desistencia(nome_jogador, data_horario):
     return 0
 
 ################################################################
-# Soma uma quantidade de pontos a uma categoria para um jogador.
+# Soma uma quantidade de pontos a uma categoria para um jogador
+# e atualiza sua pontuação total e colocação na partida.
 # nome_jogador: nome do jogador,
-# categoria: nome da categoria e  
+# categoria: nome da categoria  
 # pontuacao: quantidade de pontos (Inteiro maior que 0).
 # data_horario: data_horario da partida.
 # Retorna 0 em caso de sucesso,
@@ -242,15 +285,19 @@ def insere_pontuacao(nome_jogador, data_horario, categoria, pontuacao):
         return 3
     
     banco = bd.abre_acesso()
+    
     if not _tab_pont_jogador_partida_existe(banco, nome_jogador, data_horario):
         return 1
+    
     banco['cursor'].execute(sqlSearch_Categoria, (categoria,))
     if banco['cursor'].rowcount == 0:
         return 2
+    
     banco['cursor'].execute(sqlSearch_Pontos, (categoria,nome_jogador,data_horario))
     pontuacao_bd = banco['cursor'].fetchone()
     if pontuacao_bd['pontuacao'] is not None:
         return 4
+    
     banco['cursor'].execute(sqlUpdate_tab_pont, (pontuacao, data_horario,
                                                nome_jogador, categoria))
     banco['cursor'].execute(sqlUpdate_tabela, (pontuacao, data_horario,
@@ -309,9 +356,9 @@ def remove(nome_jogador, data_horario):
 #  ... ]
 #  As categorias ainda não pontuadas terão <pontuacao_na_categoria> = None.
 #
-# ou retorna 1 se a lista de nomes possuir um nome inválido
-# ou retorna 2 se a lista de data_horario possuir uma data_horario inválida
-##############################################################################
+# ou retorna 1 se nenhum dos nomes ou data_horarios fornecidos foram encontrados
+#
+################################################################################
     
 def obtem_tabelas(nomes, data_horarios):
     banco = bd.abre_acesso()
