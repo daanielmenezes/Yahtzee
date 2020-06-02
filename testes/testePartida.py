@@ -45,7 +45,7 @@ class Test(unittest.TestCase):
     def test_AAA_encerra_partida_nok_sem_partida(self):
         print("Caso de Teste AAA - Erro ao encerrar partida sem nenhuma"+
                 " partida em andamento.")
-        retorno = partida.encerra_partida()
+        retorno = partida.para_partida()
         self.assertEqual( retorno, 1 )
 
     def test_AAA_desiste_nok_sem_partida(self):
@@ -183,7 +183,7 @@ class Test(unittest.TestCase):
 
     def test_AAA_encerra_partida_ok_condicao_retorno(self):
         print("Caso de Teste AAA - Encerra partida com sucesso.")
-        retorno = partida.encerra_partida()
+        retorno = partida.para_partida()
         self.assertEqual( retorno, 0 )
 
     def test_AAA_continua_partida_ok(self):
