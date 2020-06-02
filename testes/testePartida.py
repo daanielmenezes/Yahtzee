@@ -8,22 +8,6 @@ class Test(unittest.TestCase):
 #      25/04/2020
 ##########################
 
-#As vezes a ordem parece estranha mas faz sentido com o 
-#desenvolvimento incremental das funcoes do modulo
-# ja que algumas condicoes de retorno de algumas funcoes 
-# so conseguem ser atingidas por uma condicao especifica de 
-# outra funcao
-# Por exemplo:
-#  pausa_partida tem um retorno especifico caso a partida ja tenha 
-#se encerrado e uma partida so consegue ser encerrada com todas as 
-#categorias sendo marcadas, entao eh necessario que marca_pontuacao
-#esteja implementada. Mas marca_pontuacao tem um retorno especifico 
-#caso a partida esteja pausada, exigindo que pausa_partida esteja 
-#implementada. Isso se resolve implementando o retorno de sucesso 
-# e de partida encerrada de marca_pontuacao, depois o retorno de 
-#sucesso e de partida encerrada de pausa_partida e depois o retorno
-#de partida encerrada de marca_pontuacao.
-
     def test_AAA_inicia_partida_nok_jogador_nao_existente(self):
         print("Caso de Teste AAA - Inicia partida nao aceita jogador"+
             " inexistente.")
@@ -165,6 +149,8 @@ class Test(unittest.TestCase):
                 " pelo jogador.")
         partida.faz_lancamento([]) 
         retorno = partida.marca_pontuacao('chance')
+        partida.faz_lancamento([])
+        retorno = partida.marca_pontuacao('chance')
         self.assertEqual( retorno, 4 )
 
     def test_AAA_salva_partida_ok_condicao_retorno(self):
@@ -189,8 +175,7 @@ class Test(unittest.TestCase):
     def test_AAA_continua_partida_ok(self):
         print("Caso de Teste AAA - Continua partida com sucesso.")
         data_horario = partida.obtem_info_partida()['data_horario']
-        data_horario = datetime.strftime(data_horario,'%Y%m%d%H%M%S%f') + '.xml'
-        print(data_horario)
+        data_horario = datetime.strftime(data_horario,'%Y%m%d%H%M%S') + '.xml'
         arq = path.join(path.realpath(path.dirname(__file__)),'saves',data_horario)
         retorno = partida.continua_partida(arq)
         self.assertEqual( retorno, 0 )
