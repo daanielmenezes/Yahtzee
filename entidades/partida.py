@@ -58,6 +58,11 @@
 #  A função salva os dados da partida mas não salva as tabelas ainda.
 #  Passando nos testes.
 #
+#---------------------------v0.6.1: 29/05/2020------------------------
+#  Por: Daniel Menezes
+#  Implementada parcialmente continua_partida. A função carrega os
+#   dados do módulo partida mas ainda não carrega os dados do módulo
+#   tabela e nem do combincação
 #######################################################################
 
 from datetime import datetime
@@ -75,7 +80,7 @@ from funcionalidades import combinacao
 from unittest import mock
 
 __all__ = ['inicia_partida', 'faz_lancamento', 'marca_pontuacao', 'desiste',
-        'obtem_partidas', 'salva_partida']
+        'obtem_partidas', 'salva_partida', 'continua_partida']
 
 
 partida_atual = {}
@@ -374,14 +379,52 @@ def salva_partida(path):
     partida_atual['salva'] = True
     return 0
 
-## Carrega uma partida que foi pausada anteriormente.
-## data_horario: identificador da partida.
-## retorna 0 em caso de sucesso
-## ou retorna 1 caso a partida informada não exista
-## ou retorna 3 caso a partida esteja encerrada
-#def continua_partida(data_horario):
-#    return
+####################################################
+# Carrega uma partida que foi salva anteriormente.
 #
+# path: caminho para o arquivo xml.
+# retorna 0 em caso de sucesso
+#  ou retorna 1 caso não seja possível ler o arquivo
+####################################################
+def continua_partida(path):
+    try:
+        arq = open(path, "r")
+    except:
+        return 1
+
+    tree = ElementTree.parse(arq)
+    root = tree.getroot()
+    arq.close()
+    
+    partida_atual = {}
+
+    #obtem data_horario
+    data_horario_string = root.find('data_horario').text
+    partida_atual['data_horario'] = datetime.strptime(data_horario_string,
+            "%Y-%m-%d %H:%M:%S.%f") 
+
+    partida_atual['combinacao'] = list()
+    for dado in root.find('combinacao').findall('dado'):
+        partida_atual['combinacao'].append(int(dado.text))
+    
+
+    pts = partida_atual['pts_combinacao'] = list()
+    for categoria in root.find('pts_combinacao').findall('categoria'):
+        pts.append( {'nome': categoria.find('nome').text,
+                     'pontuacao': int(categoria.find('pontuacao').text) })
+   
+    jogs = partida_atual['jogadores'] = list()
+    for jogador in root.find('jogadores').findall('nome'):
+        jogs.append(jogador.text)
+
+    partida_atual['turno'] = int(root.find('turno').text)
+    partida_atual['tentativas'] = int(root.find('tentativas').text)
+    partida_atual['jogador_da_vez'] = root.find('jogador_da_vez').text
+    partida_atual['status'] = 'andamento'
+    partida_atual['salva'] = True
+
+    return 0
+
 
 
 #Encerra a partida em andamento. O status da partida será alterado para
