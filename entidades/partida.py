@@ -84,8 +84,8 @@ tabela.obtem_tabelas_mock = mock.Mock()
 tabela.registra_desistencia_mock = mock.Mock()
 #tabela.cria_tabela.side_effect = [1, 0, 0, 0]
 #tabela.insere_pontuacao_mock.side_effect = [0,4]
-tabela.obtem_tabelas_mock.side_effect = [
-       [{'nome_jogador':'flavio', 
+tabela.obtem_tabelas_mock.return_value = [
+       {'nome_jogador':'flavio', 
          'data_horario_partida':None, 
          'pontos_por_categoria': [ 
                 {'nome':'chance', 'pontuacao':14},
@@ -94,7 +94,7 @@ tabela.obtem_tabelas_mock.side_effect = [
          'pontuacao_total':14, 
          'colocacao':1,
          'desistencia':False
-       }]
+       }
     ]
 tabela.registra_desistencia_mock.return_value = 0
 
@@ -154,7 +154,7 @@ def inicia_partida(nomes):
     if any(not valida_jogador(jogador) for jogador in nomes):
         return 1
 
-    data_horario = datetime.now()
+    data_horario = datetime.now().replace(microsecond=0)
     banco = banco_de_dados.abre_acesso()
     sql_partida = """INSERT Partida VALUES (%s, %s)"""
     banco['cursor'].execute(sql_partida, (data_horario, 'andamento'))
@@ -271,8 +271,7 @@ def marca_pontuacao(categoria):
 
     partida_atual['salva'] = False
     if _partida_deve_acabar():
-        partida_atual['status'] = 'encerrada'  
-        _altera_status_bd('encerrada') 
+        para_partida()
     else:
         _passa_turno()
 
@@ -296,6 +295,8 @@ def desiste(nome_jogador):
     partida_atual['jogadores'].remove(nome_jogador)
     tabela.registra_desistencia_mock(nome_jogador, partida_atual['data_horario'])
     partida_atual['salva'] = False
+    if _partida_deve_acabar():
+        para_partida()
     return 0
 
 ############################################################################
@@ -381,7 +382,7 @@ def salva_partida(path):
         else:
             sub_elem.text = str(value)
 
-    arquivo_nome = partida_atual['data_horario'].strftime('%Y%m%d%H%M%S%f')
+    arquivo_nome = partida_atual['data_horario'].strftime('%Y%m%d%H%M%S')
     arquivo_nome += ".xml"
     with open(join(path,arquivo_nome), 'w') as xml_file:
         rough_string = ElementTree.tostring(elem_partida, 'utf-8')
@@ -414,7 +415,7 @@ def continua_partida(path):
     #obtem data_horario
     data_horario_string = root.find('data_horario').text
     partida_atual['data_horario'] = datetime.strptime(data_horario_string,
-            "%Y-%m-%d %H:%M:%S.%f") 
+            "%Y-%m-%d %H:%M:%S") 
 
     partida_atual['combinacao'] = list()
     for dado in root.find('combinacao').findall('dado'):
