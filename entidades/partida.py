@@ -11,21 +11,16 @@
 #  histórico. Portanto, não é possível recuperar uma partida pausada 
 #  pelo banco de dados, para isso, é necessário salvar o estado da 
 #  partida em um arquivo XML.
-#
 #---------------------------v0.1.0: 25/05/2020-------------------------
 #  Por: Daniel Menezes
 #  Criado mocking para tabela.cria_tabela
-#  Implementada inicia_partida passando nos testes
-#
 #---------------------------v0.2.0: 27/05/2020-------------------------
 #  Por: Daniel Menezes
 #  Modificada inicia_partida. Agora se recusa a iniciar uma partida
 #  caso já haja uma partida em andamento. Passando nos novos testes.
-#
 #---------------------------v0.3.0: 27/05/2020-------------------------
 #  Por: Daniel Menezes
 #  Implementada faz_lancamento. Passando nos testes.
-#
 #---------------------------v0.4.0: 28/05/2020-------------------------
 #  Por: Daniel Menezes
 #  Implementada marca_pontuacao usando mock. Passando nos testes.
@@ -35,34 +30,32 @@
 #---------------------------v0.4.1: 28/05/2020------------------------
 #  Por: Daniel Menezes
 #  Removido import indevido de jogador.
-#
 #---------------------------v0.4.2: 28/05/2020------------------------
 #  Por: Daniel Menezes
 #  Adicionado marca_pontuacao em __all__.
-#
 #---------------------------v0.5.0: 28/05/2020------------------------
 #  Por: Daniel Menezes
 #  Criado mock de tabela.registra_desistencia
 #  Implementada desiste. Passando nos testes.
-#  
 #---------------------------v0.5.1: 29/05/2020------------------------
 #  Por: Daniel Menezes
 #  Consertado bug em que desiste removia o jogador da partida antes de
 #  passar o turno. Agora ela passa o turno e depois remove o jogador.
 #  O bug ocorria porque achar o proximo jogador depende do jogador do
 #  turno atual.
-#
 #---------------------------v0.6.0: 29/05/2020------------------------
 #  Por: Daniel Menezes
 #  Implementada parcialmente salva_partida passando nos testes.
 #  A função salva os dados da partida mas não salva as tabelas ainda.
 #  Passando nos testes.
-#
-#---------------------------v0.6.1: 29/05/2020------------------------
+#---------------------------v0.6.1: 01/06/2020------------------------
 #  Por: Daniel Menezes
 #  Implementada parcialmente continua_partida. A função carrega os
 #   dados do módulo partida mas ainda não carrega os dados do módulo
 #   tabela e nem do combincação
+#---------------------------v0.7.0: 02/06/2020------------------------
+#  Por: Daniel Menezes
+#  Implementada para_partida.
 #######################################################################
 
 from datetime import datetime
@@ -80,7 +73,7 @@ from funcionalidades import combinacao
 from unittest import mock
 
 __all__ = ['inicia_partida', 'faz_lancamento', 'marca_pontuacao', 'desiste',
-        'obtem_partidas', 'salva_partida', 'continua_partida']
+        'obtem_partidas', 'salva_partida', 'continua_partida', 'para_partida']
 
 
 partida_atual = {}
@@ -182,6 +175,26 @@ def inicia_partida(nomes):
     partida_atual['salva'] = False
 
     return data_horario 
+
+
+#######################################################################
+#  Para a partida em andamento. O status da partida será alterado para
+#   'pausada' caso esteja salva ou 'encerrada' caso não esteja salva.
+#
+#   Esta função NÃO se encarrega de salvar a partida em andamento. Para
+#    isso deve-se utilizar a função salva_partida.
+#
+#  Retorna 0 em caso de sucesso.
+#   ou retorna 1 caso não haja partida em andamento.
+#######################################################################
+def para_partida():
+    if not _ha_partida_em_andamento():
+        return 1
+    status = 'pausada' if partida_atual['salva'] else 'encerrada' 
+    partida_atual['status'] = status
+    _altera_status_bd(status)
+    return 0
+
 
 ############################################################################
 #  Gera um novo lançamento para o jogador do turno na partida em andamento.
@@ -426,12 +439,6 @@ def continua_partida(path):
     return 0
 
 
-
-#Encerra a partida em andamento. O status da partida será alterado para
-# 'encerrada' caso esteja salva ou 'pausada' caso não esteja salva.
-#
-#def encerra_partida():
-#   return
 
 
 
