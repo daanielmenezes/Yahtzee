@@ -78,25 +78,6 @@ __all__ = ['inicia_partida', 'faz_lancamento', 'marca_pontuacao', 'desiste',
 
 partida_atual = {}
 
-#MOCKS:
-#tabela.insere_pontuacao_mock = mock.Mock()
-tabela.obtem_tabelas_mock = mock.Mock()
-tabela.registra_desistencia_mock = mock.Mock()
-#tabela.cria_tabela.side_effect = [1, 0, 0, 0]
-#tabela.insere_pontuacao_mock.side_effect = [0,4]
-tabela.obtem_tabelas_mock.return_value = [
-       {'nome_jogador':'flavio', 
-         'data_horario_partida':None, 
-         'pontos_por_categoria': [ 
-                {'nome':'chance', 'pontuacao':14},
-                {'nome':'yahtzee', 'pontuacao':None}
-             ],
-         'pontuacao_total':14, 
-         'colocacao':1,
-         'desistencia':False
-       }
-    ]
-tabela.registra_desistencia_mock.return_value = 0
 
 def _proximo_jogador():
     index = partida_atual['jogadores'].index(partida_atual['jogador_da_vez'])
@@ -104,7 +85,7 @@ def _proximo_jogador():
     return partida_atual['jogadores'][index]
 
 def _partida_deve_acabar():
-    tabelas = tabela.obtem_tabelas_mock([],[partida_atual['data_horario']])
+    tabelas = tabela.obtem_tabelas([],[partida_atual['data_horario']])
 
     todos_desistiram = False
     if all(tabela_jogador['desistencia'] for tabela_jogador in tabelas):
@@ -293,7 +274,7 @@ def desiste(nome_jogador):
         _passa_turno()
 
     partida_atual['jogadores'].remove(nome_jogador)
-    tabela.registra_desistencia_mock(nome_jogador, partida_atual['data_horario'])
+    tabela.registra_desistencia(nome_jogador, partida_atual['data_horario'])
     partida_atual['salva'] = False
     if _partida_deve_acabar():
         para_partida()

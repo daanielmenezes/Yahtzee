@@ -354,7 +354,6 @@ class Test(unittest.TestCase):
                           temp[0]['data_horario'],
                           temp[0]['pontuacao_total']),
                          ('eduardo',datetime(2020,2,2,10),0))
-        temp = tabela.obtem_tabelas(['eduardo'], [])
 
     def test_047_cria_tabela_nok_nome_inexistente(self):
         print("Caso de Teste 047 - Impede criacao de tabela caso" +
@@ -624,7 +623,6 @@ class Test(unittest.TestCase):
     def test_083_marca_pontuacao_ok_sucesso(self):
         print("Caso de Teste 083 - Marca pontuacao em uma categoria com"+
                 " sucesso.")
-        partida.obtem_info_partida()['jogador_da_vez']
         retorno = partida.marca_pontuacao('chance')
         self.assertEqual( retorno, 0 )
 
@@ -658,7 +656,9 @@ class Test(unittest.TestCase):
         print("Caso de Teste 089 - Erro ao marcar pontuacao ja marcada"+
                 " pelo jogador.")
         partida.faz_lancamento([]) 
-        retorno = partida.marca_pontuacao('chance')
+        partida.marca_pontuacao('chance')
+        partida.faz_lancamento([]) 
+        partida.marca_pontuacao('chance')
         partida.faz_lancamento([])
         retorno = partida.marca_pontuacao('chance')
         self.assertEqual( retorno, 4 )

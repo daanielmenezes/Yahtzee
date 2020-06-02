@@ -114,7 +114,6 @@ class Test(unittest.TestCase):
     def test_AAA_marca_pontuacao_ok_sucesso(self):
         print("Caso de Teste AAA - Marca pontuacao em uma categoria com"+
                 " sucesso.")
-        partida.obtem_info_partida()['jogador_da_vez']
         retorno = partida.marca_pontuacao('chance')
         self.assertEqual( retorno, 0 )
 
@@ -148,7 +147,9 @@ class Test(unittest.TestCase):
         print("Caso de Teste AAA - Erro ao marcar pontuacao ja marcada"+
                 " pelo jogador.")
         partida.faz_lancamento([]) 
-        retorno = partida.marca_pontuacao('chance')
+        partida.marca_pontuacao('chance')
+        partida.faz_lancamento([]) 
+        partida.marca_pontuacao('chance')
         partida.faz_lancamento([])
         retorno = partida.marca_pontuacao('chance')
         self.assertEqual( retorno, 4 )
