@@ -11,21 +11,16 @@
 #  histórico. Portanto, não é possível recuperar uma partida pausada 
 #  pelo banco de dados, para isso, é necessário salvar o estado da 
 #  partida em um arquivo XML.
-#
 #---------------------------v0.1.0: 25/05/2020-------------------------
 #  Por: Daniel Menezes
 #  Criado mocking para tabela.cria_tabela
-#  Implementada inicia_partida passando nos testes
-#
 #---------------------------v0.2.0: 27/05/2020-------------------------
 #  Por: Daniel Menezes
 #  Modificada inicia_partida. Agora se recusa a iniciar uma partida
 #  caso já haja uma partida em andamento. Passando nos novos testes.
-#
 #---------------------------v0.3.0: 27/05/2020-------------------------
 #  Por: Daniel Menezes
 #  Implementada faz_lancamento. Passando nos testes.
-#
 #---------------------------v0.4.0: 28/05/2020-------------------------
 #  Por: Daniel Menezes
 #  Implementada marca_pontuacao usando mock. Passando nos testes.
@@ -35,29 +30,32 @@
 #---------------------------v0.4.1: 28/05/2020------------------------
 #  Por: Daniel Menezes
 #  Removido import indevido de jogador.
-#
 #---------------------------v0.4.2: 28/05/2020------------------------
 #  Por: Daniel Menezes
 #  Adicionado marca_pontuacao em __all__.
-#
 #---------------------------v0.5.0: 28/05/2020------------------------
 #  Por: Daniel Menezes
 #  Criado mock de tabela.registra_desistencia
 #  Implementada desiste. Passando nos testes.
-#  
 #---------------------------v0.5.1: 29/05/2020------------------------
 #  Por: Daniel Menezes
 #  Consertado bug em que desiste removia o jogador da partida antes de
 #  passar o turno. Agora ela passa o turno e depois remove o jogador.
 #  O bug ocorria porque achar o proximo jogador depende do jogador do
 #  turno atual.
-#
 #---------------------------v0.6.0: 29/05/2020------------------------
 #  Por: Daniel Menezes
 #  Implementada parcialmente salva_partida passando nos testes.
 #  A função salva os dados da partida mas não salva as tabelas ainda.
 #  Passando nos testes.
-#
+#---------------------------v0.6.1: 01/06/2020------------------------
+#  Por: Daniel Menezes
+#  Implementada parcialmente continua_partida. A função carrega os
+#   dados do módulo partida mas ainda não carrega os dados do módulo
+#   tabela e nem do combincação
+#---------------------------v0.7.0: 02/06/2020------------------------
+#  Por: Daniel Menezes
+#  Implementada para_partida.
 #######################################################################
 
 from datetime import datetime
@@ -68,22 +66,25 @@ from xml.etree.ElementTree import Element, SubElement, Comment
 from xml.dom import minidom
 
 from entidades import tabela
+from entidades.jogador import valida_jogador
 from funcionalidades import banco_de_dados
 from funcionalidades import combinacao
 
 from unittest import mock
 
 __all__ = ['inicia_partida', 'faz_lancamento', 'marca_pontuacao', 'desiste',
-        'obtem_partidas', 'salva_partida']
+        'obtem_partidas', 'salva_partida', 'continua_partida', 'para_partida']
 
 
 partida_atual = {}
 
 #MOCKS:
-tabela = mock.Mock()
-tabela.cria_tabela.side_effect = [1, 0, 0, 0]
-tabela.insere_pontuacao.side_effect = [0,4]
-tabela.obtem_tabelas.side_effect = [
+tabela.insere_pontuacao_mock = mock.Mock()
+tabela.obtem_tabelas_mock = mock.Mock()
+tabela.registra_desistencia_mock = mock.Mock()
+#tabela.cria_tabela.side_effect = [1, 0, 0, 0]
+tabela.insere_pontuacao_mock.side_effect = [0,4]
+tabela.obtem_tabelas_mock.side_effect = [
        [{'nome_jogador':'flavio', 
          'data_horario_partida':None, 
          'pontos_por_categoria': [ 
@@ -95,7 +96,7 @@ tabela.obtem_tabelas.side_effect = [
          'desistencia':False
        }]
     ]
-tabela.registra_desistencia.return_value = 0
+tabela.registra_desistencia_mock.return_value = 0
 
 def _proximo_jogador():
     index = partida_atual['jogadores'].index(partida_atual['jogador_da_vez'])
@@ -103,7 +104,7 @@ def _proximo_jogador():
     return partida_atual['jogadores'][index]
 
 def _partida_deve_acabar():
-    tabelas = tabela.obtem_tabelas([],[partida_atual['data_horario']])
+    tabelas = tabela.obtem_tabelas_mock([],[partida_atual['data_horario']])
 
     todos_desistiram = False
     if all(tabela_jogador['desistencia'] for tabela_jogador in tabelas):
@@ -150,21 +151,17 @@ def _passa_turno():
 def inicia_partida(nomes):
     if _ha_partida_em_andamento():
         return 2
-    data_horario = datetime.now()
-    for jogador in nomes:
-        cod_retorno = tabela.cria_tabela(jogador, data_horario) 
-        if cod_retorno == 1:
-            #jogador nao existe
-            for jogador_a_remover in nomes:
-                if jogador == jogador_a_remover:
-                    break
-                tabela.remove(jogador, data_horario)
-            return 1
+    if any(not valida_jogador(jogador) for jogador in nomes):
+        return 1
 
+    data_horario = datetime.now()
     banco = banco_de_dados.abre_acesso()
     sql_partida = """INSERT Partida VALUES (%s, %s)"""
     banco['cursor'].execute(sql_partida, (data_horario, 'andamento'))
     banco_de_dados.fecha_acesso(banco)
+
+    for jogador in nomes:
+        cod_retorno = tabela.cria_tabela(jogador, data_horario) 
 
     shuffle(nomes)
     partida_atual['data_horario'] = data_horario
@@ -178,6 +175,26 @@ def inicia_partida(nomes):
     partida_atual['salva'] = False
 
     return data_horario 
+
+
+#######################################################################
+#  Para a partida em andamento. O status da partida será alterado para
+#   'pausada' caso esteja salva ou 'encerrada' caso não esteja salva.
+#
+#   Esta função NÃO se encarrega de salvar a partida em andamento. Para
+#    isso deve-se utilizar a função salva_partida.
+#
+#  Retorna 0 em caso de sucesso.
+#   ou retorna 1 caso não haja partida em andamento.
+#######################################################################
+def para_partida():
+    if not _ha_partida_em_andamento():
+        return 1
+    status = 'pausada' if partida_atual['salva'] else 'encerrada' 
+    partida_atual['status'] = status
+    _altera_status_bd(status)
+    return 0
+
 
 ############################################################################
 #  Gera um novo lançamento para o jogador do turno na partida em andamento.
@@ -247,7 +264,7 @@ def marca_pontuacao(categoria):
             partida_atual['data_horario'],
             categoria,
             pontos]
-    ret_insere = tabela.insere_pontuacao(*args)
+    ret_insere = tabela.insere_pontuacao_mock(*args)
 
     if ret_insere == 4:
         return 4
@@ -277,7 +294,7 @@ def desiste(nome_jogador):
         _passa_turno()
 
     partida_atual['jogadores'].remove(nome_jogador)
-    tabela.registra_desistencia(nome_jogador, partida_atual['data_horario'])
+    tabela.registra_desistencia_mock(nome_jogador, partida_atual['data_horario'])
     partida_atual['salva'] = False
     return 0
 
@@ -375,21 +392,53 @@ def salva_partida(path):
     partida_atual['salva'] = True
     return 0
 
-## Carrega uma partida que foi pausada anteriormente.
-## data_horario: identificador da partida.
-## retorna 0 em caso de sucesso
-## ou retorna 1 caso a partida informada não exista
-## ou retorna 3 caso a partida esteja encerrada
-#def continua_partida(data_horario):
-#    return
+####################################################
+# Carrega uma partida que foi salva anteriormente.
 #
+# path: caminho para o arquivo xml.
+# retorna 0 em caso de sucesso
+#  ou retorna 1 caso não seja possível ler o arquivo
+####################################################
+def continua_partida(path):
+    try:
+        arq = open(path, "r")
+    except:
+        return 1
+
+    tree = ElementTree.parse(arq)
+    root = tree.getroot()
+    arq.close()
+    
+    partida_atual = {}
+
+    #obtem data_horario
+    data_horario_string = root.find('data_horario').text
+    partida_atual['data_horario'] = datetime.strptime(data_horario_string,
+            "%Y-%m-%d %H:%M:%S.%f") 
+
+    partida_atual['combinacao'] = list()
+    for dado in root.find('combinacao').findall('dado'):
+        partida_atual['combinacao'].append(int(dado.text))
+    
+
+    pts = partida_atual['pts_combinacao'] = list()
+    for categoria in root.find('pts_combinacao').findall('categoria'):
+        pts.append( {'nome': categoria.find('nome').text,
+                     'pontuacao': int(categoria.find('pontuacao').text) })
+   
+    jogs = partida_atual['jogadores'] = list()
+    for jogador in root.find('jogadores').findall('nome'):
+        jogs.append(jogador.text)
+
+    partida_atual['turno'] = int(root.find('turno').text)
+    partida_atual['tentativas'] = int(root.find('tentativas').text)
+    partida_atual['jogador_da_vez'] = root.find('jogador_da_vez').text
+    partida_atual['status'] = 'andamento'
+    partida_atual['salva'] = True
+
+    return 0
 
 
-#Encerra a partida em andamento. O status da partida será alterado para
-# 'encerrada' caso esteja salva ou 'pausada' caso não esteja salva.
-#
-#def encerra_partida():
-#   return
 
 
 

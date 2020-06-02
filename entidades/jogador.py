@@ -17,6 +17,12 @@
 #   -atualiza_info
 #   -valida_jogador
 #  
+#-------------------------v1.0.1: 01/06/2020-------------------------
+#  Por: Daniel Menezes
+#  Consertado a busca por todos os jogadores ao passar uma lista
+#    vazia na obtem_info. 
+#  Adicionado retorno 1 caso haja algum valor inválido no input de 
+#    obtem_info.
 #####################################################################
 
 from datetime import datetime 
@@ -124,23 +130,24 @@ def remove(nome):
 #    “posicao_ranking”
 #  }  
 #  ou retorna uma lista vazia se nenhum nome recebido for encontrado
+#  ou retorna 1 caso o input seja inválido.
 ########################################################################
 def obtem_info(nomes):
-    if not nomes:
-        retorno = []
-    else:
-        sqlBusca = """ SELECT *
-                       FROM Jogador
-                       WHERE nome = %s """
+    if type(nomes) == list and all(type(nome) == str for nome in nomes):
+        sqlBusca = "SELECT * FROM Jogador "
 
-        for i in range(len(nomes) - 1):
-            sqlBusca += "OR nome = %s"
+        if nomes:
+            sqlBusca += "WHERE nome = %s "
+
+            for i in range(len(nomes) - 1):
+                sqlBusca += "OR nome = %s"
 
         banco = bd.abre_acesso()
-        banco['cursor'].execute(sqlBusca, tuple(nomes))
+        banco['cursor'].execute(sqlBusca, nomes)
         retorno = [dictJogador for dictJogador in banco['cursor']]
         bd.fecha_acesso(banco)
-
+    else:
+        retorno = 1
     return retorno
 
 

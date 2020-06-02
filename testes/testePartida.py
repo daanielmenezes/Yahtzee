@@ -42,6 +42,12 @@ class Test(unittest.TestCase):
         retorno = partida.marca_pontuacao('1')
         self.assertEqual( retorno, 1 )
 
+    def test_AAA_encerra_partida_nok_sem_partida(self):
+        print("Caso de Teste AAA - Erro ao encerrar partida sem nenhuma"+
+                " partida em andamento.")
+        retorno = partida.para_partida()
+        self.assertEqual( retorno, 1 )
+
     def test_AAA_desiste_nok_sem_partida(self):
         print("Caso de Teste AAA - Erro desiste sem partida em andamento.")
         retorno = partida.desiste('flavio')
@@ -175,26 +181,26 @@ class Test(unittest.TestCase):
         retorno = partida.salva_partida(saves)
         self.assertEqual(retorno, 2)
 
-
-        
-#################
+    def test_AAA_encerra_partida_ok_condicao_retorno(self):
+        print("Caso de Teste AAA - Encerra partida com sucesso.")
+        retorno = partida.para_partida()
+        self.assertEqual( retorno, 0 )
 
     def test_AAA_continua_partida_ok(self):
         print("Caso de Teste AAA - Continua partida com sucesso.")
-        data_horario = tabela.obtem_tabelas(['eleanor'],[])[-1]['data_horario']
-        retorno = partida.continua_partida( data_horario )
+        data_horario = partida.obtem_info_partida()['data_horario']
+        data_horario = datetime.strftime(data_horario,'%Y%m%d%H%M%S%f') + '.xml'
+        print(data_horario)
+        arq = path.join(path.realpath(path.dirname(__file__)),'saves',data_horario)
+        retorno = partida.continua_partida(arq)
         self.assertEqual( retorno, 0 )
 
-    def test_AAA_continua_partida_nok_partida_inexistente(self):
-        print("Caso de Teste AAA - Erro ao continuar uma partida inexistente.")
-        retorno = partida.continua_partida( "11:01:00:10:21:41" )
+    def test_AAA_continua_partida_nok_arquivo_inexistente(self):
+        print("Caso de Teste AAA - Continua partida Erro ao não encontrar o arquivo")
+        retorno = partida.continua_partida('arquivo_nao_existente') 
         self.assertEqual( retorno, 1 )
 
-    def test_AAA_continua_partida_nok_partida_encerrada(self):
-        print("Caso de Teste AAA - Erro ao continuar uma partida encerrada.")
-        data_horario = tabela.obtem_tabelas(['hugo'],[])[-1]['data_horario']
-        retorno = partida.continua_partida( data_horario )
-        self.assertEqual( retorno, 3 )
+#################
 
     def test_AAA_obtem_info_partida_ok_data_horario_correto(self):
         print("Caso de Teste AAA - Obtem info com data_horario correto.")
