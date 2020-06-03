@@ -56,6 +56,10 @@
 #---------------------------v0.7.0: 02/06/2020------------------------
 #  Por: Daniel Menezes
 #  Implementada para_partida.
+#---------------------------v0.7.1: 02/06/2020------------------------
+#  Por: Daniel Menezes
+#  Removidos todos os mocks.
+#  salva_partida e continua_partida salvam e inicializam as tabelas
 #######################################################################
 
 from datetime import datetime
@@ -66,7 +70,7 @@ from xml.etree.ElementTree import Element, SubElement, Comment
 from xml.dom import minidom
 
 from entidades import tabela
-from entidades.jogador import valida_jogador
+from entidades.jogador import valida_jogador, insere as insere_jogador, atualiza_info as atualiza_jogador
 from funcionalidades import banco_de_dados
 from funcionalidades import combinacao
 
@@ -78,25 +82,6 @@ __all__ = ['inicia_partida', 'faz_lancamento', 'marca_pontuacao', 'desiste',
 
 partida_atual = {}
 
-#MOCKS:
-#tabela.insere_pontuacao_mock = mock.Mock()
-tabela.obtem_tabelas_mock = mock.Mock()
-tabela.registra_desistencia_mock = mock.Mock()
-#tabela.cria_tabela.side_effect = [1, 0, 0, 0]
-#tabela.insere_pontuacao_mock.side_effect = [0,4]
-tabela.obtem_tabelas_mock.return_value = [
-       {'nome_jogador':'flavio', 
-         'data_horario_partida':None, 
-         'pontos_por_categoria': [ 
-                {'nome':'chance', 'pontuacao':14},
-                {'nome':'yahtzee', 'pontuacao':None}
-             ],
-         'pontuacao_total':14, 
-         'colocacao':1,
-         'desistencia':False
-       }
-    ]
-tabela.registra_desistencia_mock.return_value = 0
 
 def _proximo_jogador():
     index = partida_atual['jogadores'].index(partida_atual['jogador_da_vez'])
@@ -104,7 +89,7 @@ def _proximo_jogador():
     return partida_atual['jogadores'][index]
 
 def _partida_deve_acabar():
-    tabelas = tabela.obtem_tabelas_mock([],[partida_atual['data_horario']])
+    tabelas = tabela.obtem_tabelas([],[partida_atual['data_horario']])
 
     todos_desistiram = False
     if all(tabela_jogador['desistencia'] for tabela_jogador in tabelas):
@@ -139,6 +124,100 @@ def _passa_turno():
     partida_atual['turno'] += 1
     partida_atual['tentativas'] = 3
     return
+
+def _preenche_element_tree_partida_atual(elem_partida):
+    for key, value in partida_atual.items():
+        if key in ('salva', 'status'):
+            continue
+
+        sub_elem = SubElement(elem_partida, key)
+        if key == 'jogadores':
+            for nome_jogador in value:
+                elem_nome = SubElement(sub_elem, 'nome')
+                elem_nome.text = nome_jogador
+        elif key == 'combinacao':
+            for dado in value:
+                elem_dado = SubElement(sub_elem, 'dado')
+                elem_dado.text = str(dado)
+        elif key == 'pts_combinacao':
+            for categoria in value:
+                elem_categoria = SubElement(sub_elem, 'categoria')
+                elem_categoria_nome = SubElement(elem_categoria, 'nome')
+                elem_categoria_pontuacao = SubElement(elem_categoria,
+                        'pontuacao')
+                elem_categoria_nome.text = categoria['nome']
+                elem_categoria_pontuacao.text = str(categoria['pontuacao'])
+        else:
+            sub_elem.text = str(value)
+    return
+
+def _preenche_element_tree_tabelas(elem_partida):
+    tabelas = tabela.obtem_tabelas([], [partida_atual['data_horario']])
+    elem_tabelas = SubElement(elem_partida, 'tabelas')
+    for dict_tabela in tabelas:
+        elem_tabela = SubElement(elem_tabelas, 'tabela')
+        for k, v in dict_tabela.items():
+            if k in ('data_horario', 'colocacao', 'pontuacao_total'):
+                continue
+            elem_atributo = SubElement(elem_tabela, k)
+            if k == 'pontos_por_categoria':
+                for categoria in v:
+                    elem_categoria = SubElement(elem_atributo, 'categoria')
+                    nome = SubElement(elem_categoria, 'nome') 
+                    nome.text = categoria['nome']
+                    pontuacao = SubElement(elem_categoria, 'pontuacao')
+                    pontuacao.text = str(categoria['pontuacao'])
+            else:
+                elem_atributo.text = str(v)
+                
+
+def _carrega_dados_partida_atual(root):
+    partida_atual = {}
+    data_horario_string = root.find('data_horario').text
+    partida_atual['data_horario'] = datetime.strptime(data_horario_string,
+            "%Y-%m-%d %H:%M:%S") 
+
+    partida_atual['combinacao'] = list()
+    for dado in root.find('combinacao').findall('dado'):
+        partida_atual['combinacao'].append(int(dado.text))
+    
+
+    pts = partida_atual['pts_combinacao'] = list()
+    for categoria in root.find('pts_combinacao').findall('categoria'):
+        pts.append( {'nome': categoria.find('nome').text,
+                     'pontuacao': int(categoria.find('pontuacao').text) })
+   
+    jogs = partida_atual['jogadores'] = list()
+    for jogador in root.find('jogadores').findall('nome'):
+        jogs.append(jogador.text)
+
+    partida_atual['turno'] = int(root.find('turno').text)
+    partida_atual['tentativas'] = int(root.find('tentativas').text)
+    partida_atual['jogador_da_vez'] = root.find('jogador_da_vez').text
+    partida_atual['status'] = 'andamento'
+    partida_atual['salva'] = True
+    return
+
+def _carrega_dados_tabelas(root):
+    for tabela_jogador in root.find('tabelas').findall('tabela'):
+        nome_jogador = tabela_jogador.find('nome_jogador').text
+        insere_jogador(nome_jogador)
+        tabela.remove(nome_jogador, partida_atual['data_horario'])
+        tabela.cria_tabela(nome_jogador, partida_atual['data_horario'])
+
+        categorias = tabela_jogador.find('pontos_por_categoria')
+        for categoria in categorias.findall('categoria'):
+            categ_pontuacao = categoria.find('pontuacao').text
+            if categ_pontuacao != 'None':
+                categ_pontuacao = int(categ_pontuacao)
+                categ_nome = categoria.find('nome').text
+                tabela.insere_pontuacao(nome_jogador,
+                                        partida_atual['data_horario'],
+                                        categ_nome,
+                                        categ_pontuacao)
+    return
+
+
 
 #################################################################
 # Cria uma nova partida e associa tabelas para os seus jogadores.
@@ -293,7 +372,7 @@ def desiste(nome_jogador):
         _passa_turno()
 
     partida_atual['jogadores'].remove(nome_jogador)
-    tabela.registra_desistencia_mock(nome_jogador, partida_atual['data_horario'])
+    tabela.registra_desistencia(nome_jogador, partida_atual['data_horario'])
     partida_atual['salva'] = False
     if _partida_deve_acabar():
         para_partida()
@@ -358,37 +437,20 @@ def salva_partida(path):
         return 2
     
     elem_partida = Element('partida')
-    for key, value in partida_atual.items():
-        if key in ('salva', 'status'):
-            continue
+    _preenche_element_tree_partida_atual(elem_partida)
+    _preenche_element_tree_tabelas(elem_partida) 
 
-        sub_elem = SubElement(elem_partida, key)
-        if key == 'jogadores':
-            for nome_jogador in value:
-                elem_nome = SubElement(sub_elem, 'nome')
-                elem_nome.text = nome_jogador
-        elif key == 'combinacao':
-            for dado in value:
-                elem_dado = SubElement(sub_elem, 'dado')
-                elem_dado.text = str(dado)
-        elif key == 'pts_combinacao':
-            for categoria in value:
-                elem_categoria = SubElement(sub_elem, 'categoria')
-                elem_categoria_nome = SubElement(elem_categoria, 'nome')
-                elem_categoria_pontuacao = SubElement(elem_categoria,
-                        'pontuacao')
-                elem_categoria_nome.text = categoria['nome']
-                elem_categoria_pontuacao.text = str(categoria['pontuacao'])
-        else:
-            sub_elem.text = str(value)
+    rough_string = ElementTree.tostring(elem_partida, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    final_string = reparsed.toprettyxml(indent="  ")
 
     arquivo_nome = partida_atual['data_horario'].strftime('%Y%m%d%H%M%S')
     arquivo_nome += ".xml"
-    with open(join(path,arquivo_nome), 'w') as xml_file:
-        rough_string = ElementTree.tostring(elem_partida, 'utf-8')
-        reparsed = minidom.parseString(rough_string)
-        final_string = reparsed.toprettyxml(indent="  ")
-        xml_file.write(final_string)
+    try:
+        with open(join(path,arquivo_nome), 'w') as xml_file:
+            xml_file.write(final_string)
+    except:
+        return 3
 
     partida_atual['salva'] = True
     return 0
@@ -399,6 +461,10 @@ def salva_partida(path):
 # path: caminho para o arquivo xml.
 # retorna 0 em caso de sucesso
 #  ou retorna 1 caso não seja possível ler o arquivo
+#
+# Assertiva de entrada: o arquivo xml é considerado
+#  corretamente formado já que é produzido pela pró-
+#  pria aplicação
 ####################################################
 def continua_partida(path):
     try:
@@ -410,32 +476,9 @@ def continua_partida(path):
     root = tree.getroot()
     arq.close()
     
-    partida_atual = {}
 
-    #obtem data_horario
-    data_horario_string = root.find('data_horario').text
-    partida_atual['data_horario'] = datetime.strptime(data_horario_string,
-            "%Y-%m-%d %H:%M:%S") 
-
-    partida_atual['combinacao'] = list()
-    for dado in root.find('combinacao').findall('dado'):
-        partida_atual['combinacao'].append(int(dado.text))
-    
-
-    pts = partida_atual['pts_combinacao'] = list()
-    for categoria in root.find('pts_combinacao').findall('categoria'):
-        pts.append( {'nome': categoria.find('nome').text,
-                     'pontuacao': int(categoria.find('pontuacao').text) })
-   
-    jogs = partida_atual['jogadores'] = list()
-    for jogador in root.find('jogadores').findall('nome'):
-        jogs.append(jogador.text)
-
-    partida_atual['turno'] = int(root.find('turno').text)
-    partida_atual['tentativas'] = int(root.find('tentativas').text)
-    partida_atual['jogador_da_vez'] = root.find('jogador_da_vez').text
-    partida_atual['status'] = 'andamento'
-    partida_atual['salva'] = True
+    _carrega_dados_partida_atual(root)
+    _carrega_dados_tabelas(root)
 
     return 0
 
@@ -472,8 +515,10 @@ def continua_partida(path):
 #   { “nome”: <nome_da_categoria3>, “pontuacao”: <pontuacao_na_categoria_3> }
 #  ... ]
 #
-#  Retorna 1 caso não haja uma partida em andamento.
+#  Retorna 1 caso não haja uma partida carregada.
 #
 ##############################################################################
 def obtem_info_partida():
+    if not partida_atual:
+        return 1
     return partida_atual
