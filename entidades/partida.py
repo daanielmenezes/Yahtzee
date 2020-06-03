@@ -66,7 +66,7 @@ from xml.etree.ElementTree import Element, SubElement, Comment
 from xml.dom import minidom
 
 from entidades import tabela
-from entidades.jogador import valida_jogador
+from entidades.jogador import valida_jogador, insere as insere_jogador, atualiza_info as atualiza_jogador
 from funcionalidades import banco_de_dados
 from funcionalidades import combinacao
 
@@ -153,20 +153,66 @@ def _preenche_element_tree_tabelas(elem_partida):
     for dict_tabela in tabelas:
         elem_tabela = SubElement(elem_tabelas, 'tabela')
         for k, v in dict_tabela.items():
+            if k in ('data_horario', 'colocacao', 'pontuacao_total'):
+                continue
             elem_atributo = SubElement(elem_tabela, k)
             if k == 'pontos_por_categoria':
                 for categoria in v:
                     elem_categoria = SubElement(elem_atributo, 'categoria')
-                    for nome_categ, pts in categoria.items():
-                        nome = SubElement(elem_categoria, 'nome') 
-                        nome.text = nome_categ
-                        pontuacao = SubElement(elem_categoria, 'pontuacao')
-                        pontuacao.text = str(pts)
-            elif k == 'data_horario':
-                continue
+                    nome = SubElement(elem_categoria, 'nome') 
+                    nome.text = categoria['nome']
+                    pontuacao = SubElement(elem_categoria, 'pontuacao')
+                    pontuacao.text = str(categoria['pontuacao'])
             else:
                 elem_atributo.text = str(v)
                 
+
+def _carrega_dados_partida_atual(root):
+    partida_atual = {}
+    data_horario_string = root.find('data_horario').text
+    partida_atual['data_horario'] = datetime.strptime(data_horario_string,
+            "%Y-%m-%d %H:%M:%S") 
+
+    partida_atual['combinacao'] = list()
+    for dado in root.find('combinacao').findall('dado'):
+        partida_atual['combinacao'].append(int(dado.text))
+    
+
+    pts = partida_atual['pts_combinacao'] = list()
+    for categoria in root.find('pts_combinacao').findall('categoria'):
+        pts.append( {'nome': categoria.find('nome').text,
+                     'pontuacao': int(categoria.find('pontuacao').text) })
+   
+    jogs = partida_atual['jogadores'] = list()
+    for jogador in root.find('jogadores').findall('nome'):
+        jogs.append(jogador.text)
+
+    partida_atual['turno'] = int(root.find('turno').text)
+    partida_atual['tentativas'] = int(root.find('tentativas').text)
+    partida_atual['jogador_da_vez'] = root.find('jogador_da_vez').text
+    partida_atual['status'] = 'andamento'
+    partida_atual['salva'] = True
+    return
+
+def _carrega_dados_tabelas(root):
+    for tabela_jogador in root.find('tabelas').findall('tabela'):
+        nome_jogador = tabela_jogador.find('nome_jogador').text
+        insere_jogador(nome_jogador)
+        tabela.remove(nome_jogador, partida_atual['data_horario'])
+        tabela.cria_tabela(nome_jogador, partida_atual['data_horario'])
+
+        categorias = tabela_jogador.find('pontos_por_categoria')
+        for categoria in categorias.findall('categoria'):
+            categ_pontuacao = categoria.find('pontuacao').text
+            if categ_pontuacao != 'None':
+                categ_pontuacao = int(categ_pontuacao)
+                categ_nome = categoria.find('nome').text
+                tabela.insere_pontuacao(nome_jogador,
+                                        partida_atual['data_horario'],
+                                        categ_nome,
+                                        categ_pontuacao)
+    return
+
 
 
 #################################################################
@@ -313,7 +359,7 @@ def marca_pontuacao(categoria):
 #  ou retorna 2 caso nome_jogador não seja o nome de nenhum jogador da partida
 ##############################################################################
 def desiste(nome_jogador):
-    if not _ha_partida_m_andamento():
+    if not _ha_partida_em_andamento():
         return 1
     if nome_jogador not in partida_atual['jogadores']:
         return 2
@@ -411,6 +457,10 @@ def salva_partida(path):
 # path: caminho para o arquivo xml.
 # retorna 0 em caso de sucesso
 #  ou retorna 1 caso não seja possível ler o arquivo
+#
+# Assertiva de entrada: o arquivo xml é considerado
+#  corretamente formado já que é produzido pela pró-
+#  pria aplicação
 ####################################################
 def continua_partida(path):
     try:
@@ -422,31 +472,9 @@ def continua_partida(path):
     root = tree.getroot()
     arq.close()
     
-    partida_atual = {}
 
-    data_horario_string = root.find('data_horario').text
-    partida_atual['data_horario'] = datetime.strptime(data_horario_string,
-            "%Y-%m-%d %H:%M:%S") 
-
-    partida_atual['combinacao'] = list()
-    for dado in root.find('combinacao').findall('dado'):
-        partida_atual['combinacao'].append(int(dado.text))
-    
-
-    pts = partida_atual['pts_combinacao'] = list()
-    for categoria in root.find('pts_combinacao').findall('categoria'):
-        pts.append( {'nome': categoria.find('nome').text,
-                     'pontuacao': int(categoria.find('pontuacao').text) })
-   
-    jogs = partida_atual['jogadores'] = list()
-    for jogador in root.find('jogadores').findall('nome'):
-        jogs.append(jogador.text)
-
-    partida_atual['turno'] = int(root.find('turno').text)
-    partida_atual['tentativas'] = int(root.find('tentativas').text)
-    partida_atual['jogador_da_vez'] = root.find('jogador_da_vez').text
-    partida_atual['status'] = 'andamento'
-    partida_atual['salva'] = True
+    _carrega_dados_partida_atual(root)
+    _carrega_dados_tabelas(root)
 
     return 0
 
