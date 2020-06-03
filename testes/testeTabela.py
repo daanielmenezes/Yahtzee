@@ -11,7 +11,9 @@ class Testmock(unittest.TestCase):
         print("Caso de Teste AAA - Cria tabela com sucesso")
         jogador.insere('eduardo')
 
-        #adiciona partida ao bd para ser usada para testes.
+        #adiciona partida ao bd para ser usada para testes. Adicionamos
+        #direto ao bd para saber o data_horaio identificador, que é
+        #gerado automaticamente pelo módulo partida e fica encapsulado nele
         
         banco = banco_de_dados.abre_acesso()
         data_horario = datetime(2020,2,2,10)
@@ -27,8 +29,10 @@ class Testmock(unittest.TestCase):
         temp = tabela.obtem_tabelas(['eduardo'], [datetime(2020,2,2,10)])
         self.assertEqual((temp[0]['nome_jogador'],
                           temp[0]['data_horario'],
-                          temp[0]['pontuacao_total']),
-                         ('eduardo',datetime(2020,2,2,10),0))
+                          temp[0]['pontuacao_total'],
+                          temp[0]['colocacao'],
+                          temp[0]['desistencia']),
+                         ('eduardo',datetime(2020,2,2,10),0, None, False))
 
     def test_AAA_cria_tabela_nok_nome_inexistente(self):
         print("Caso de Teste AAA - Impede criacao de tabela caso" +
@@ -154,6 +158,16 @@ class Testmock(unittest.TestCase):
         tab_jorge = tabela.obtem_tabelas(['jorge'],[datetime(2020,2,2,10)])
         self.assertEqual((tab_ed[0]['colocacao'], tab_jorge[0]['colocacao']),
                          (1,2))
+
+    def test_AAA_obtem_tabelas_ok_colocacoes_corretas(self):
+        print("Caso de Teste AAA - Pontos por categoria corretos")
+        tab_edu = tabela.obtem_tabelas(['eduardo'],[datetime(2020,2,2,10)])
+        n_categorias = len(categoria.obtem_nomes())
+        todos_pontos_iguais_a_30 = True
+        for i in range(n_categorias):
+            if tab_edu[0]['pontos_por_categoria'][i]['pontuacao'] !=30:
+                todos_pontos_iguais_a_30 = False
+        self.assertTrue(todos_pontos_iguais_a_30)
         
     def test_AAA_obtem_tabelas_nok_parametros_invalidos(self):
         print("Caso de Teste AAA - obtem_info retorna 1 se as listas não"
@@ -171,7 +185,7 @@ class Testmock(unittest.TestCase):
         print("Caso de Teste AAA - Verifica remocao")
         retorno_esperado = tabela.obtem_tabelas(['eduardo'],
                                                 [datetime(2020,2,2,10)])
-        self.assertEqual(retorno_esperado, 1)
+        self.assertEqual(retorno_esperado, 1)#pois obtem retorna 1 se n acha tabela
 
     def test_AAA_remove_nok_tabela_nao_existe(self):
         print("Caso de Teste AAA - impede remocao caso tabela" +
