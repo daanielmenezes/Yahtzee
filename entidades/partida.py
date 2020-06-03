@@ -221,6 +221,7 @@ def _carrega_dados_tabelas(root):
 
 #################################################################
 # Cria uma nova partida e associa tabelas para os seus jogadores.
+#
 # nomes: lista de nomes dos jogadores participantes.
 #
 # retorna data_horario da partida criada em caso de sucesso
@@ -263,6 +264,11 @@ def inicia_partida(nomes):
 #   Esta função NÃO se encarrega de salvar a partida em andamento. Para
 #    isso deve-se utilizar a função salva_partida.
 #
+#  A partida continua carregada na memória após chamar esta função para
+#   a interface de usuário poder continuar acessando as suas informações
+#   por meio da obtem_info_partida(). A partida só sai da memória quando
+#   o módulo é recarregado ou quando uma nova partida se inicia.
+#
 #  Retorna 0 em caso de sucesso.
 #   ou retorna 1 caso não haja partida em andamento.
 #######################################################################
@@ -294,7 +300,7 @@ def para_partida():
 def faz_lancamento(dados_escolhidos):
     if not _ha_partida_em_andamento():
         return 1
-    if any(d not in range(1,7) for d in dados_escolhidos):
+    if any(d not in range(0,5) for d in dados_escolhidos):
         return 2
     if partida_atual['tentativas'] == 3 and dados_escolhidos:
         return 3
@@ -313,7 +319,8 @@ def faz_lancamento(dados_escolhidos):
 #
 #  Atribui ao jogador do turno da partida atual os pontos do seu último
 #   lançamento (do mesmo turno) na categoria escolhida e passa para o
-#   próximo turno.
+#   próximo turno. Caso a última categoria disponível é marcada, a
+#   partida é encerrada.  
 #
 #  categoria: nome da categoria escolhida
 #
@@ -357,7 +364,8 @@ def marca_pontuacao(categoria):
     return 0
 
 ##############################################################################
-# Retira um jogador da partida.
+# Retira um jogador da partida. Se todos os jogadores desistirem, a partida
+#  acaba.
 # Retorna 0 em caso de sucesso.
 #  ou retorna 1 caso não haja partida em andamento
 #  ou retorna 2 caso nome_jogador não seja o nome de nenhum jogador da partida
@@ -409,7 +417,9 @@ def obtem_partidas(data_horario = [], status = []):
                                                 (len(data_horario)-1)*',%s')
         if status:
             sqlBusca += ' AND status in (%s{})'.format((len(status)-1)*',%s')
-        banco['cursor'].execute(sqlBusca, tuple(data_horario+status))
+        print(sqlBusca)
+        print(data_horario,status)
+        banco['cursor'].execute(sqlBusca, data_horario+status)
     elif status:
         sqlBusca += ' WHERE status in (%s{})'.format((len(status)-1)*',%s')
         banco['cursor'].execute(sqlBusca, status)
@@ -456,15 +466,17 @@ def salva_partida(path):
     return 0
 
 ####################################################
-# Carrega uma partida que foi salva anteriormente.
+# Carrega uma partida que foi salva anteriormente e 
+#  a coloca em andamento.
+#
+# Hipótese: o arquivo xml é considerado
+#  corretamente formado já que é produzido pela pró-
+#  pria aplicação
 #
 # path: caminho para o arquivo xml.
 # retorna 0 em caso de sucesso
 #  ou retorna 1 caso não seja possível ler o arquivo
 #
-# Assertiva de entrada: o arquivo xml é considerado
-#  corretamente formado já que é produzido pela pró-
-#  pria aplicação
 ####################################################
 def continua_partida(path):
     try:
@@ -480,11 +492,12 @@ def continua_partida(path):
     _carrega_dados_partida_atual(root)
     _carrega_dados_tabelas(root)
 
+    if _partida_deve_acabar():
+        _altera_status_bd('encerrada')
+        partida_atual['status'] = 'encerrada'
+    else:
+        _altera_status_bd('andamento')
     return 0
-
-
-
-
 
 ##############################################################################
 #
@@ -496,11 +509,11 @@ def continua_partida(path):
 #   {
 #   “data_horario”,         #identificador
 #   status”,               #status da partida
-#   “combinacao_atual”,     #lista com os valores dos 5 dados
-#   “pts_combinacoes”,      #lista com dicionários com as pontuações possíveis
+#   “combinacao”,     #lista com os valores dos 5 dados
+#   “pts_combinacao”,      #lista com dicionários com as pontuações possíveis
 #                           # (ver abaixo)
 #
-#   “turno_atual” ,         #número do turno atual
+#   “turno” ,         #número do turno atual
 #   “jogador_da_vez” ,      #nome do jogador da vez
 #   “tentativas” ,          #número de tentativas restantes para lançamento
 #   “jogadores” ,           #lista com os nomes dos jogadores participantes
@@ -509,7 +522,7 @@ def continua_partida(path):
 #                               (True/False)
 # }
 #
-# “pts_combinacoes”:
+# “pts_combinacao”:
 # [ { “nome”: <nome_da_categoria1>, “pontuacao”: <pontuacao_na_categoria_1> },
 #   { “nome”: <nome_da_categoria2>, “pontuacao”: <pontuacao_na_categoria_2> },
 #   { “nome”: <nome_da_categoria3>, “pontuacao”: <pontuacao_na_categoria_3> }
