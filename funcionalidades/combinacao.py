@@ -50,3 +50,33 @@ def gera_combinacao(dados_escolhidos = []):
             combinacao[i] = dado.rola(6)
     pontos = avalia(combinacao)
     return {'pontos':pontos, 'combinacao':combinacao}
+
+
+###############################################################################
+# 
+# Inicializa a combinação encapsulada com a lista da última combinação
+# ao continuar uma partida
+# combinacao_fornecida: lista com 5 valores entre 1 e 6 representando os valores
+# dos dados da última combinação
+# retorna 1 caso o tamanho da lista combinacao_fornecida seja inválido
+# retorna 2 caso algum dos dados tenha valor inválido 
+#
+###############################################################################
+
+
+def inicializa_combinacao(combinacao_fornecida):
+    if range(combinacao_fornecida) != 5:
+        return 1
+    
+    for dado in combinacao_fornecida:
+        if dado not in range(1:7):
+            return 2
+
+    combinacao = combinacao_fornecida
+    return 0
+
+    
+
+
+
+
