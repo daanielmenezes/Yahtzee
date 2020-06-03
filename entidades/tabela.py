@@ -1,15 +1,12 @@
 ########################################################################
 # MODULO TABELA
 #
-#  Responsável por manipular as cartelas dos jogadores, armazenando
-#  as informações referentes a sua pontuação e a sua participação
-#  em cada partida. Implementada com duas relações no banco
-#  de dados: Tabela, que armazena a pontuação total, colocação e
-#  desistência (booleano) dos jogadores para cada partida, e
-#  Tabela_Pontuacao, que armazena a pontuação correspondente a cada
-#  categoria dos jogadores nas partidas. Essas duas relações já estão
-#  criadas separadamente.
-#
+# Responsável por criar, manipular e fornecer informações sobre as cartelas
+# dos jogadores, armazenando as informações referentes à sua pontuação e à sua
+# participação em cada partida. Guarda, para todas as partidas e jogadores, a
+# pontuação por categoria, os nomes das categorias, a pontuação total dos
+# jogadores nas partidas, suas colocações e quais jogadores desistiram de
+# quais partidas.
 #
 #---------------------------v0.1.0: 29/05/2020-------------------------
 #  Por: Bruno Coutinho
@@ -168,23 +165,29 @@ def obtem_tab_nenhuma_vazia(conexao, nomes, data_horarios):
 
 #####################################################################
 # Cria e armazena uma nova tabela(cartela) com pontuação zerada 
-# e associada a um jogador e a uma partida. Nessa implementação com
-# banco de dados, inserimos nas relações Tabela e Tabela_Pontuacao
-# tuplas correspondentes ao jogador e partida informados, com pontuacao
-# zerada.
+# e associada a um jogador e a uma partida. 
 # nome_jogador: nome do jogador a ser associado à tabela
 # data_horario: identificador data_horario da partida a ser associada
 # retorna 0 em caso de sucesso
 # ou retorna 1 caso não exista um jogador com o nome indicado
 # ou retorna 2 caso o jogador já possua uma tabela nessa partida
+#
+# assertiva de entrada: o data_horario fornecido será correto pois
+# será criado e armazenado pelo módulo partida, que é o único
+# módulo que chama a função
 #####################################################################
 
 def cria_tabela(nome_jogador, data_horario):
     if not jogador.valida_jogador(nome_jogador):
         return 1
-
+    
+    #scripts sql de inserção das infos dos novos jogadores nas duas
+    #relações do banco de dados referentes a cartela (Tabela e
+    #Tabela_Pontuacao)
+    
     sqlInsert_tab = ''' INSERT INTO Tabela VALUES (%s,%s,%s,%s,%s) '''
-    sqlInsert_tab_pont = ''' INSERT INTO Tabela_Pontuacao VALUES (%s,%s,%s,%s) '''
+    sqlInsert_tab_pont = ''' INSERT INTO Tabela_Pontuacao
+                         VALUES (%s,%s,%s,%s) '''
 
     banco = bd.abre_acesso()
 
@@ -224,15 +227,23 @@ def cria_tabela(nome_jogador, data_horario):
 # retorna 0 em caso de sucesso
 # ou retorna 1 se a tabela do jogador na partida não existir
 # ou retorna 2 se o jogador já pontuou em todas as categorias
+#
+# assertiva de entrada: o data_horario fornecido será correto pois
+# será criado e armazenado pelo módulo partida, que é o único
+# módulo que chama a função
 ############################################################################
 
 def registra_desistencia(nome_jogador, data_horario):
+    
+    #scripts sql usados ao longo da função
+    
     sqlSearch_tab_pontuacao = ''' SELECT pontuacao FROM Tabela_Pontuacao
                               WHERE nome_jogador = %s AND data_horario = %s'''
     sqlUpdate_tabela = ''' UPDATE Tabela SET desistencia = True
                            WHERE data_horario = %s AND nome_jogador = %s'''
     sqlUpdate_tab_pontuacao = ''' UPDATE Tabela_Pontuacao SET pontuacao = 0
-                           WHERE data_horario = %s AND nome_jogador = %s'''
+                           WHERE data_horario = %s AND nome_jogador = %s
+                           AND pontuacao IS NULL'''
     
     banco = bd.abre_acesso()
     if not _tabela_jogador_partida_existe(banco, nome_jogador, data_horario)\
@@ -270,6 +281,11 @@ def registra_desistencia(nome_jogador, data_horario):
 ################################################################
 
 def insere_pontuacao(nome_jogador, data_horario, categoria, pontuacao):
+    if pontuacao < 0:
+        return 3
+
+    #scripts sql usados ao longo da funçao:
+    
     sqlSearch_Categoria = ''' SELECT nome_categoria FROM Tabela_Pontuacao
                           WHERE nome_categoria = %s'''
     sqlSearch_Pontos = ''' SELECT pontuacao FROM Tabela_Pontuacao
@@ -281,9 +297,6 @@ def insere_pontuacao(nome_jogador, data_horario, categoria, pontuacao):
     sqlUpdate_tabela = ''' UPDATE Tabela SET pontuacao_total = pontuacao_total + %s
                        WHERE data_horario = %s AND nome_jogador = %s'''
     
-    if pontuacao < 0:
-        return 3
-    
     banco = bd.abre_acesso()
     
     if not _tab_pont_jogador_partida_existe(banco, nome_jogador, data_horario):
@@ -293,7 +306,8 @@ def insere_pontuacao(nome_jogador, data_horario, categoria, pontuacao):
     if banco['cursor'].rowcount == 0:
         return 2
     
-    banco['cursor'].execute(sqlSearch_Pontos, (categoria,nome_jogador,data_horario))
+    banco['cursor'].execute(sqlSearch_Pontos,
+                            (categoria, nome_jogador, data_horario))
     pontuacao_bd = banco['cursor'].fetchone()
     if pontuacao_bd['pontuacao'] is not None:
         return 4
@@ -363,6 +377,10 @@ def remove(nome_jogador, data_horario):
     
 def obtem_tabelas(nomes, data_horarios):
     banco = bd.abre_acesso()
+
+    #tratamento das possibilidades das listas fornecidas serem vazias.
+    #Variável tuplas_tabela terá infos dos jogadores/partidas extraídas
+    #da relação Tabela do banco de dados
     
     if nomes == [] and data_horarios == []:
         tuplas_tabela = obtem_tab_ambas_vazias(banco)
@@ -379,17 +397,21 @@ def obtem_tabelas(nomes, data_horarios):
         if tuplas_tabela == []:
             return 1
 
+    #script sql usado para buscar pontuação por categoria do jogador 
+    
     sqlSearch_tab_pont = ''' SELECT nome_categoria as nome, pontuacao
                          FROM Tabela_Pontuacao
                          WHERE data_horario = %s
                          AND nome_jogador = %s'''
     
     for elemento in tuplas_tabela:
+        #converte para booleano, pois mysql não tem tipo de dado para isso
         if elemento['desistencia'] ==0:
             elemento['desistencia'] = False
         else:
             elemento['desistencia'] = True
             
+        #preenche pontuacao por categoria da lista a ser retornada
         banco['cursor'].execute(
             sqlSearch_tab_pont, (elemento['data_horario'],
                                  elemento['nome_jogador']))
