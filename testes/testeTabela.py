@@ -145,7 +145,8 @@ class Testmock(unittest.TestCase):
                           temp[0]['data_horario'],
                           temp[0]['pontuacao_total'],
                           temp[0]['desistencia']),
-                         ('eduardo',datetime(2020,2,2,10),30 * n_categorias,True))
+                         ('eduardo',datetime(2020,2,2,10),
+                          30 * n_categorias,False))
 
     def test_AAA_obtem_tabelas_ok_colocacoes_corretas(self):
         print("Caso de Teste AAA - Tabelas calculam colocacoes corretamente")
@@ -154,17 +155,11 @@ class Testmock(unittest.TestCase):
         self.assertEqual((tab_ed[0]['colocacao'], tab_jorge[0]['colocacao']),
                          (1,2))
         
-    def test_AAA_obtem_tabelas_nok_nome_invalido(self):
-        print("Caso de Teste AAA - obtem_info retorna 1"
-              + " se a lista de nomes possuir um nome invalido")
+    def test_AAA_obtem_tabelas_nok_parametros_invalidos(self):
+        print("Caso de Teste AAA - obtem_info retorna 1 se as listas não"
+              + " possuirem nenhuma combinacao(nome,data_horario) valida")
         retorno_esperado = tabela.obtem_tabelas(['pedro'],[datetime(2020,2,2,10)])
         self.assertEqual(retorno_esperado, 1)
-
-    def test_AAA_obtem_tabelas_nok_data_horario_invalido(self):
-        print("Caso de Teste AAA - obtem_info retorna 2"
-              + " se a lista de data_horario possuir um data_horario invalido")
-        retorno_esperado = tabela.obtem_tabelas(['eduardo'],[datetime(2019,4,25,17)])
-        self.assertEqual(retorno_esperado, 2)
         
     def test_AAA_remove_ok_condicao_retorno(self):
         print("Caso de Teste AAA - remove tabela de um jogador" +

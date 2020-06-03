@@ -356,7 +356,8 @@ def remove(nome_jogador, data_horario):
 #  ... ]
 #  As categorias ainda não pontuadas terão <pontuacao_na_categoria> = None.
 #
-# ou retorna 1 se nenhum dos nomes ou data_horarios fornecidos foram encontrados
+# ou retorna 1 se nenhuma das combinações dos nomes com data_horarios fornecidas
+# foi encontrada
 #
 ################################################################################
     
@@ -384,6 +385,11 @@ def obtem_tabelas(nomes, data_horarios):
                          AND nome_jogador = %s'''
     
     for elemento in tuplas_tabela:
+        if elemento['desistencia'] ==0:
+            elemento['desistencia'] = False
+        else:
+            elemento['desistencia'] = True
+            
         banco['cursor'].execute(
             sqlSearch_tab_pont, (elemento['data_horario'],
                                  elemento['nome_jogador']))
