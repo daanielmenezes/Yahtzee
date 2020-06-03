@@ -14,6 +14,12 @@ class Test(unittest.TestCase):
         retorno = partida.inicia_partida(["juan"])
         self.assertEqual( retorno , 1 )
 
+    def test_AAA_obtem_info_artida_nok_sem_partida(self):
+        print("Caso de Teste AAA - Erro em obtem info sem nenhuma"+
+                " partida em andamento.")
+        retorno = partida.obtem_info_partida()
+        self.assertEqual(retorno, 1)
+
     def test_AAA_faz_lancamento_nok_partida_sem_partida(self):
         print("Caso de Teste AAA - Erro em fazer lancamento sem nenhuma"+
                 " partida em andamento.")
@@ -26,7 +32,7 @@ class Test(unittest.TestCase):
         retorno = partida.marca_pontuacao('1')
         self.assertEqual( retorno, 1 )
 
-    def test_AAA_encerra_partida_nok_sem_partida(self):
+    def test_AAA_para_partida_nok_sem_partida(self):
         print("Caso de Teste AAA - Erro ao encerrar partida sem nenhuma"+
                 " partida em andamento.")
         retorno = partida.para_partida()
@@ -45,15 +51,19 @@ class Test(unittest.TestCase):
         retorno = partida.salva_partida(saves)
         self.assertEqual(retorno, 1)
 
-    def test_AAA_inicia_partida_ok(self):
+    def test_AAA_inicia_partida_ok_condicao_retorno(self):
         print("Caso de Teste AAA - Inicia partida com sucesso.")
         jogador.insere("flavio")
         jogador.insere("lucas")
         jogador.insere("julia")
         retorno = partida.inicia_partida(["flavio", "lucas", "julia"])
         self.assertIsInstance(retorno, datetime)
-        self.partidaFlavio = retorno
    
+    def test_AAA_inicia_partida_ok_jogadores_corretos(self):
+        print("Caso de Teste AAA - Obtem info com jogadores corretos.")
+        jogadores = partida.obtem_info_partida()['jogadores']
+        self.assertSetEqual(set(jogadores), set(['flavio', 'lucas', 'julia']))
+
     def test_AAA_inicia_partida_nok_partida_em_andamento(self):
         print("Caso de Teste AAA - Inicia partida recusa iniciar partida"+
                 " com outra partida em andamento.")
@@ -119,8 +129,8 @@ class Test(unittest.TestCase):
 
     def test_AAA_marca_pontuacao_ok_passou_o_turno(self):
         print("Caso de Teste AAA - Marca pontuacao passou o turno.")
-        retorno = partida.obtem_info_partida()['turno']
-        self.assertEqual( retorno, 2 )
+        turno = partida.obtem_info_partida()['turno']
+        self.assertEqual( turno, 2 )
 
     def test_AAA_marca_pontuacao_ok_restaura_tentativa(self):
         print("Caso de Teste AAA - Marca pontuacao proximo jogador tem 3"+
@@ -168,7 +178,7 @@ class Test(unittest.TestCase):
         retorno = partida.salva_partida(saves)
         self.assertEqual(retorno, 2)
 
-    def test_AAA_encerra_partida_ok_condicao_retorno(self):
+    def test_AAA_para_partida_ok_condicao_retorno(self):
         print("Caso de Teste AAA - Encerra partida com sucesso.")
         retorno = partida.para_partida()
         self.assertEqual( retorno, 0 )
@@ -186,56 +196,36 @@ class Test(unittest.TestCase):
         retorno = partida.continua_partida('arquivo_nao_existente') 
         self.assertEqual( retorno, 1 )
 
-#################
+    def test_AAA_obtem_info_partida_ok_condicao_retorno(self):
+        print("Caso de Teste AAA - obtem_info_partida condição de retorno ok.")
+        retorno = partida.obtem_info_partida()
+        self.assertEqual(set(retorno.keys()), {'data_horario',
+                                        'status',
+                                        'combinacao',
+                                        'pts_combinacao',
+                                        'turno',
+                                        'jogador_da_vez',
+                                        'tentativas',
+                                        'jogadores',
+                                        'salva'})
 
-    def test_AAA_obtem_info_partida_ok_data_horario_correto(self):
-        print("Caso de Teste AAA - Obtem info com data_horario correto.")
-        data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
-        info_partida_flavio = partida.obtem_info_partida([data_horario], [])[0]
-        assertEqual(info_partida_flavio['data_horario'], data_horario)
+    def test_AAA_obtem_partidas_ok_condicao_retorno(self):
+        print("Caso de Teste AAA - obtem_partidas condicao de retorno ok")
+        retorno = partida.obtem_partidas(status = 'andamento')
+        data_horario = partida.obtem_info_partida()['data_horario']
+        self.assertIn({'data_horario':data_horario, 'status':'andamento'},
+                      retorno)
 
-    def test_AAA_obtem_info_partida_ok_status_correto(self):
-        print("Caso de Teste AAA - Obtem info com status correto.")
-        data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
-        info_partida_flavio = partida.obtem_info_partida([data_horario], [])[0]
-        assertEqual(info_partida_flavio['status'], 'andamento')
+    def test_AAA_obtem_partidas_ok_condicao_retorno2(self):
+        print("Caso de Teste AAA - obtem_partidas condicao de retorno ok"+
+                " partida nao encontrada.")
+        retorno = partida.obtem_partidas(datetime(2019,1,1,2,1,3))
+        self.assertEqual(retorno, [])
 
-    def test_AAA_obtem_info_partida_ok_turno_correto(self):
-        print("Caso de Teste AAA - Obtem info com turno_atual correto.")
-        data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
-        info_partida_flavio = partida.obtem_info_partida([data_horario], [])[0]
-        assertEqual(info_partida_flavio['turno_atual'], 4)
+    def test_AAA_obtem_partidas_nok_parametro_invalido(self):
+        print("Caso de Teste AAA - obtem_partidas erro com parametro invalido")
+        retorno = partida.obtem_partidas('parametro_invalido', [1])
+        self.assertEqual( retorno, 1 )
 
-    def test_AAA_obtem_info_partida_ok_jogador_da_vez_correto(self):
-        print("Caso de Teste AAA - Obtem info com jogador_da_vez correto.")
-        data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
-        info_partida_flavio = partida.obtem_info_partida([data_horario], [])[0]
-        assertEqual(info_partida_flavio['jogador_da_vez'], 'flavio')
-
-    def test_AAA_obtem_info_partida_ok_tentativas_correto(self):
-        print("Caso de Teste AAA - Obtem info com tentativas restantes correto.")
-        data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
-        info_partida_flavio = partida.obtem_info_partida([data_horario], [])[0]
-        assertEqual(info_partida_flavio['tentativas'], 2)
-
-    def test_AAA_obtem_info_partida_ok_jogadores_correto(self):
-        #considerando que jogadores desistentes continuam registrados
-        print("Caso de Teste AAA - Obtem info com jogadores corretos.")
-        data_horario = tabela.obtem_tabelas(['flavio'],[])[-1]['data_horario']
-        info_partida_flavio = partida.obtem_info_partida([data_horario], [])[0]
-
-        jogadores_cadastrados = set( jogadores
-                for jogador in ['flavio', 'julia', 'lucas'] )
-
-        jogadores_partida = set(jogadores 
-                for jogador in info_partida_flavio['jogadores'] )
-
-
-        assertEqual(jogadores_partida, jogadores_cadastrados)
-
-    def test_AAA_obtem_info_partida_nok_lista_vazia(self):
-        print("Caso de Teste AAA - Obtem info retorna lista vazia se nao achar.")
-        info_partida = partida.obtem_info_partida([datetime(2000, 1, 11, 12, 21, 11, 0)], [])[0]
-        assertEqual(info_partida, [] )
 
 unittest.main()
