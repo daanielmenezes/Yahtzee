@@ -180,7 +180,7 @@ def _carrega_dados_partida_atual(root):
     partida_atual['combinacao'] = list()
     for dado in root.find('combinacao').findall('dado'):
         partida_atual['combinacao'].append(int(dado.text))
-    
+    combinacao.inicializa_combinacao(partida_atual['combinacao'])
 
     pts = partida_atual['pts_combinacao'] = list()
     for categoria in root.find('pts_combinacao').findall('categoria'):
@@ -417,8 +417,6 @@ def obtem_partidas(data_horario = [], status = []):
                                                 (len(data_horario)-1)*',%s')
         if status:
             sqlBusca += ' AND status in (%s{})'.format((len(status)-1)*',%s')
-        print(sqlBusca)
-        print(data_horario,status)
         banco['cursor'].execute(sqlBusca, data_horario+status)
     elif status:
         sqlBusca += ' WHERE status in (%s{})'.format((len(status)-1)*',%s')

@@ -65,11 +65,11 @@ def gera_combinacao(dados_escolhidos = []):
 
 
 def inicializa_combinacao(combinacao_fornecida):
-    if range(combinacao_fornecida) != 5:
+    if len(combinacao_fornecida) != 5:
         return 1
     
     for dado in combinacao_fornecida:
-        if dado not in range(1:7):
+        if dado not in range(1,7):
             return 2
 
     combinacao = combinacao_fornecida
