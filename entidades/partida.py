@@ -56,6 +56,10 @@
 #---------------------------v0.7.0: 02/06/2020------------------------
 #  Por: Daniel Menezes
 #  Implementada para_partida.
+#---------------------------v0.7.1: 02/06/2020------------------------
+#  Por: Daniel Menezes
+#  Removidos todos os mocks.
+#  salva_partida e continua_partida salvam e inicializam as tabelas
 #######################################################################
 
 from datetime import datetime
