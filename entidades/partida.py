@@ -74,7 +74,6 @@ from entidades.jogador import valida_jogador, insere as insere_jogador, atualiza
 from funcionalidades import banco_de_dados
 from funcionalidades import combinacao
 
-from unittest import mock
 
 __all__ = ['inicia_partida', 'faz_lancamento', 'marca_pontuacao', 'desiste',
         'obtem_partidas', 'salva_partida', 'continua_partida', 'para_partida']
