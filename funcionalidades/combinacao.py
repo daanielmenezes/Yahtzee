@@ -11,6 +11,10 @@
 #--------------v1.0.0: 03/05/2020--------------------
 #  Por: Daniel Menezes
 #  - mocking de avalia removido
+#
+#--------------v1.0.1: 02/06/2020--------------------
+#  Por: Bruno Coutinho
+#  -função inicializa_combinacao implementada
 #####################################################################
 
 from . import dado
@@ -20,8 +24,8 @@ from .avalia import avalia_combinacao as avalia
 __all__ = ["gera_combinacao"]
 
 combinacao = [None, None, None, None, None]
-#futuramente poderá ser inicitalizada com valores salvos ao continuar uma
-#partida pausada
+#pode ser inicializada com valores salvos ao continuar uma partida. Isso é
+#feito com a função de acesso inicializa_combinacao
 
 ###############################################################################
 #
