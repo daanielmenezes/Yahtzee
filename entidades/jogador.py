@@ -29,7 +29,7 @@ from datetime import datetime
 import funcionalidades.banco_de_dados as bd
 
 __all__ = [ 'insere' , 'valida_jogador', 'remove', 'obtem_info',
-            'atualiza_info', 'valida_jogador' ]
+            'atualiza_info', ]
 
 
 def _atualiza_rank(conexao):
