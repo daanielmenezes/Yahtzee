@@ -278,6 +278,11 @@ def para_partida():
     status = 'pausada' if partida_atual['salva'] else 'encerrada' 
     partida_atual['status'] = status
     _altera_status_bd(status)
+    tabelas = tabela.obtem_tabelas([],[partida_atual['data_horario']])
+    for tab_jog in tabelas:
+        if status == 'encerrada' and not tab_jog['desistencia']:
+            atualiza_jogador(tab_jog['nome_jogador'],
+                    tab_jog['pontuacao_total'])
     return 0
 
 
