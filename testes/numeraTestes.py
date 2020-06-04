@@ -19,7 +19,19 @@ output.write( "from os import path\n" )
 output.write( "from datetime import datetime\n" )
 output.write( "from entidades import *\n" )
 output.write( "from funcionalidades import *\n" )
+
+output.write("""
+def limpa_tabelas():
+    tabelas = ['Tabela_Pontuacao', 'Tabela', 'Jogador', 'Partida']
+    banco = banco_de_dados.abre_acesso()
+    sqlDelete = "delete from "
+    for tab in tabelas:
+        banco['cursor'].execute(sqlDelete+tab)
+    banco_de_dados.fecha_acesso(banco)
+""")
+
 output.write("\nclass Test(unittest.TestCase):\n")
+
 
 i = 0
 testes = open(os.path.join(base, 'ordem.txt'), 'r')
@@ -33,5 +45,7 @@ for teste in testes:
             linha = linha.replace("AAA", "%03d" % i)
             output.write(linha)
     teste.close()
-output.write("unittest.main()\n")
+output.write("unittest.main(exit=False)\n")
+output.write("limpa_tabelas()")
+
 output.close()

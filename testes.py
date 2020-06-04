@@ -5,6 +5,14 @@ from datetime import datetime
 from entidades import *
 from funcionalidades import *
 
+def limpa_tabelas():
+    tabelas = ['Tabela_Pontuacao', 'Tabela', 'Jogador', 'Partida']
+    banco = banco_de_dados.abre_acesso()
+    sqlDelete = "delete from "
+    for tab in tabelas:
+        banco['cursor'].execute(sqlDelete+tab)
+    banco_de_dados.fecha_acesso(banco)
+
 class Test(unittest.TestCase):
 
 
@@ -763,4 +771,5 @@ class Test(unittest.TestCase):
         self.assertEqual( retorno, 1 )
 
 
-unittest.main()
+unittest.main(exit=False)
+limpa_tabelas()
