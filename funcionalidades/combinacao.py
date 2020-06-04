@@ -21,7 +21,7 @@ from . import dado
 
 from .avalia import avalia_combinacao as avalia
 
-__all__ = ["gera_combinacao"]
+__all__ = ["gera_combinacao", "inicializa_combinacao"]
 
 combinacao = [None, None, None, None, None]
 #pode ser inicializada com valores salvos ao continuar uma partida. Isso é
