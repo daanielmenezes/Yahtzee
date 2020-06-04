@@ -76,7 +76,8 @@ from funcionalidades import combinacao
 
 
 __all__ = ['inicia_partida', 'faz_lancamento', 'marca_pontuacao', 'desiste',
-        'obtem_partidas', 'salva_partida', 'continua_partida', 'para_partida']
+        'obtem_partidas', 'salva_partida', 'continua_partida', 'para_partida',
+           'obtem_info_partida']
 
 
 partida_atual = {}
@@ -235,7 +236,7 @@ def inicia_partida(nomes):
 
     data_horario = datetime.now().replace(microsecond=0)
     banco = banco_de_dados.abre_acesso()
-    sql_partida = """INSERT Partida VALUES (%s, %s)"""
+    sql_partida = """INSERT INTO Partida VALUES (%s, %s)"""
     banco['cursor'].execute(sql_partida, (data_horario, 'andamento'))
     banco_de_dados.fecha_acesso(banco)
 
