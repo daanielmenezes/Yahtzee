@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
-from entidades import jogador
-from . import menu_principal
+from entidades import jogador, partida
+from . import menu_principal, partida as partida_gui
 
 def atualiza_lista_jogadores( listbox ):
     nomes_jogadores = [ dados_jogador['nome'] for dados_jogador in jogador.obtem_info([]) ]
@@ -26,7 +26,7 @@ def cria_frame_novoJogador(parent, listbox):
                 messagebox.showerror("Erro","O nome não pode ser vazio")
             elif retorno == 2:
                 messagebox.showerror("Erro","Já existe um jogador com o nome escolhido")
-            elif retorno == 0:
+            else:
                 messagebox.showinfo("Info", "Jogador Criado. Agora ele pode ser escholido para jogar.")
                 atualiza_lista_jogadores( listbox )
             et_nome.delete(0,END)
@@ -67,6 +67,31 @@ def cria_frame_lista_de_jogadores(parent):
     listbox_nomes.pack( fill = 'x', expand = True)
     return listbox_nomes
 
+def inicia_partida( window, listbox ):
+    # nomes selecionados na listbox
+    nomes = [listbox.get(idx) for idx in listbox.curselection()]
+    if nomes:
+        #cursor de loading pra nao parecer que travou
+        window.config(cursor="watch")
+        window.update()
+
+        retorno = partida.inicia_partida(nomes)
+
+        #cursor normal
+        window.config(cursor="arrow")
+        window.update()
+
+        if retorno == 1:
+            messagebox.showerror("Erro","Jogador inválido escolhido.")
+        elif retorno == 2:
+            messagebox.showerror("Erro","Há uma outra partida em andamento.")
+        else:
+            # descomentar quando tiver criado:
+            #partida_gui.transicao( window )
+            print("GUI DA PARTIDA AINDA NAO CRIADA")
+            messagebox.showerror("Erro","GUI DA PARTIDA AINDA NAO CRIADA")
+    else:
+        messagebox.showerror("Erro","É preciso selecionar pelo menos um jogador.")
 
 def transicao( window ):
     if window._frame:
@@ -82,9 +107,9 @@ def transicao( window ):
     
     cria_frame_novoJogador( fr_menuPartida, listbox )
 
-    bt_voltar = Button(fr_menuPartida, text="Voltar ao Menu Principal", command=lambda: menu_principal.transicao(window ))
-    bt_inicia = Button(fr_menuPartida, text="Iniciar Partida")
-    bt_voltar.pack(fill='x', padx=5, pady=5)
+    bt_voltar = Button(fr_menuPartida, text="Voltar ao Menu Principal", command=lambda: menu_principal.transicao(window))
+    bt_inicia = Button(fr_menuPartida, text="Iniciar Partida", command=lambda: inicia_partida(window, listbox))
     bt_inicia.pack(fill='x', padx=5, pady=5)
+    bt_voltar.pack(fill='x', padx=5, pady=5)
 
     window._frame = fr_menuPartida
