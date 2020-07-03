@@ -1,6 +1,5 @@
 import unittest
-
-#from entidades.jogador import *
+from entidades.jogador import *
 
 class Testmock(unittest.TestCase):
 ##########################
@@ -53,9 +52,24 @@ class Testmock(unittest.TestCase):
 
     def test_AAA_obtem_info_nok_jogador_nao_encontrado(self):
         print("Caso de Teste AAA - obtem_info retorna lista"
-              + "vazia se nomes nao encontrados")
+              + " vazia se nomes nao encontrados")
         retorno_esperado = jogador.obtem_info(['julia'])
         self.assertEqual(retorno_esperado, [])
+
+    def test_AAA_obtem_info_ok_todos_os_jogadores(self):
+        print("Caso de Teste AAA - obtem_info mostra todos os jogadores "+
+                "com lista vazia no input.")
+        retorno_esperado = jogador.obtem_info([])[0]
+        self.assertEqual((retorno_esperado['nome'],
+                          retorno_esperado['pontuacao_total'],
+                          retorno_esperado['recorde']),
+                         ('joao',0,0))
+
+    def test_AAA_obtem_info_nok_input_invalido(self):
+        print("Caso de Teste AAA - obtem_info erro com input inválido")
+        retorno_esperado = jogador.obtem_info([1,2,3])
+        self.assertEqual( retorno_esperado, 1 )
+
 
     def test_AAA_atualiza_info_ok_condicao_retorno(self):
         print("Caso de Teste AAA - Atualiza pontuacao total,"+
@@ -65,7 +79,7 @@ class Testmock(unittest.TestCase):
 
     def test_AAA_atualiza_info_ok_atualiza_com_sucesso(self):
         print("Caso de Teste AAA - Verifica atualizacao")
-        info_joao = jogador.obtem_info('joao')[0]
+        info_joao = jogador.obtem_info(['joao'])[0]
         self.assertEqual((info_joao['pontuacao_total'],
                           info_joao['recorde']),(100,100))
 

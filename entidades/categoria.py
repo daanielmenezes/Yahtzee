@@ -4,11 +4,11 @@
 #  Responsável por guardar os nomes e a descrição de todas as categorias
 #  e disponibilizá-las.
 # 
-#--------------primeira versao: 28/04/20-----------------
+#--------------v1.0.0: 28/04/20-----------------
+#  Por: Daniel Menezes
 #  -13 categorias implementadas: 
 #        1,2,3,4,5,6,tripla,quadra, sequencia4, sequencia5, fullhouse
 #        yahtzee e chance
-#
 #  -obtem_nomes implementada e passando em todos os testes
 #  -obtem_descricoes implementada e passando em todos os testes
 #####################################################################
@@ -50,7 +50,7 @@ categorias = [
         },
         {
         'nome':'fullhouse',
-        'descricao':'Uma dupla e uma tripla de valors diferentes.'
+        'descricao':'Uma dupla e uma tripla de valores diferentes.'
         },
         {
         'nome':'sequencia4',
@@ -86,7 +86,7 @@ def obtem_nomes():
 
 #########################################################
 #Obtem todas as categorias e suas descrições.
-#Retorna uma lista dicionários:
+#Retorna uma lista de dicionários:
 #########################################################
 
 def obtem_descricoes():

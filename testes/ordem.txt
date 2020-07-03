@@ -1,3 +1,4 @@
+testeBanco.py
 testeDado.py
 testeCategoria.py
 testeAvalia.py

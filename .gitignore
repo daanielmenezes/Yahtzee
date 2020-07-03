@@ -1,0 +1,4 @@
+__pychache/
+*.pyc
+[.-]*.sw[a-p]
+saves/*.xml
