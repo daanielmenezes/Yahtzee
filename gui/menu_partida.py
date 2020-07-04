@@ -2,6 +2,8 @@ from tkinter import *
 from tkinter import messagebox
 from entidades import jogador, partida
 from . import menu_principal, partida as partida_gui
+import time
+import threading
 
 def atualiza_lista_jogadores( listbox ):
     nomes_jogadores = [ dados_jogador['nome'] for dados_jogador in jogador.obtem_info([]) ]
@@ -69,28 +71,29 @@ def cria_frame_lista_de_jogadores(parent):
     return listbox_nomes
 
 def inicia_partida( window, listbox ):
-    # nomes selecionados na listbox
-    nomes = [listbox.get(idx) for idx in listbox.curselection()]
-    if nomes:
-        #cursor de loading pra nao parecer que travou
-        window.config(cursor="watch")
-        window.update()
-
+    # macete com threding para não travar a aplicação enquanto acessa o bd
+    def thread_inicia_partida():
         retorno = partida.inicia_partida(nomes)
-
-        #cursor normal
-        window.config(cursor="arrow")
-        window.update()
 
         if retorno == 1:
             messagebox.showerror("Erro","Jogador inválido escolhido.")
+            window.config(cursor="arrow")
+
         elif retorno == 2:
             messagebox.showerror("Erro","Há uma outra partida em andamento.")
+            window.config(cursor="arrow")
         else:
-            # descomentar quando tiver criado:
-            #partida_gui.transicao( window )
-            print("GUI DA PARTIDA AINDA NAO CRIADA")
-            messagebox.showerror("Erro","GUI DA PARTIDA AINDA NAO CRIADA")
+            partida_gui.transicao( window )
+
+    # nomes selecionados na listbox
+    nomes = [listbox.get(idx) for idx in listbox.curselection()]
+    if nomes:
+        #cursor de loading pq inicia_partida demora um pouco
+        window.config(cursor="watch")
+        window.update()
+
+        #executa a função de cima um uma nova thread
+        threading.Thread(target=thread_inicia_partida).start()
     else:
         messagebox.showerror("Erro","É preciso selecionar pelo menos um jogador.")
 
