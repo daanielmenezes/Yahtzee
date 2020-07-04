@@ -4,3 +4,5 @@ __pychache/
 saves/*.xml
 .vs/
 Generated\ Files/
+.sln
+.pyproj
