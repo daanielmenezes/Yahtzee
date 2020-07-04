@@ -2,3 +2,5 @@ __pychache/
 *.pyc
 [.-]*.sw[a-p]
 saves/*.xml
+.vs/
+Generated\ Files/
