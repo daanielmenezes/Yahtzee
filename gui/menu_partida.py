@@ -53,7 +53,8 @@ def cria_frame_lista_de_jogadores(parent):
     fr_containerLista = Frame( parent, bd=1, relief=SOLID)
     fr_containerLista.pack(side='left', pady=45, padx=(10,10) )
 
-    listbox_nomes = Listbox( fr_containerLista , height=11, width=20, selectmode=MULTIPLE, relief=FLAT)
+    listbox_nomes = Listbox( fr_containerLista , height=11, width=20,
+                           selectmode=MULTIPLE, relief=FLAT, activestyle = 'none')
 
     #barra de rolagem
     scroll_y = Scrollbar( fr_containerLista, orient = 'vertical', command = listbox_nomes.yview) 
