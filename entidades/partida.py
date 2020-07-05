@@ -136,17 +136,19 @@ def _preenche_element_tree_partida_atual(elem_partida):
                 elem_nome = SubElement(sub_elem, 'nome')
                 elem_nome.text = nome_jogador
         elif key == 'combinacao':
-            for dado in value:
-                elem_dado = SubElement(sub_elem, 'dado')
-                elem_dado.text = str(dado)
+            if value:
+                for dado in value:
+                    elem_dado = SubElement(sub_elem, 'dado')
+                    elem_dado.text = str(dado)
         elif key == 'pts_combinacao':
-            for categoria in value:
-                elem_categoria = SubElement(sub_elem, 'categoria')
-                elem_categoria_nome = SubElement(elem_categoria, 'nome')
-                elem_categoria_pontuacao = SubElement(elem_categoria,
-                        'pontuacao')
-                elem_categoria_nome.text = categoria['nome']
-                elem_categoria_pontuacao.text = str(categoria['pontuacao'])
+            if value:
+                for categoria in value:
+                    elem_categoria = SubElement(sub_elem, 'categoria')
+                    elem_categoria_nome = SubElement(elem_categoria, 'nome')
+                    elem_categoria_pontuacao = SubElement(elem_categoria,
+                            'pontuacao')
+                    elem_categoria_nome.text = categoria['nome']
+                    elem_categoria_pontuacao.text = str(categoria['pontuacao'])
         else:
             sub_elem.text = str(value)
     return
@@ -172,7 +174,7 @@ def _preenche_element_tree_tabelas(elem_partida):
                 
 
 def _carrega_dados_partida_atual(root):
-    partida_atual = {}
+    partida_atual.clear()
     data_horario_string = root.find('data_horario').text
     partida_atual['data_horario'] = datetime.strptime(data_horario_string,
             "%Y-%m-%d %H:%M:%S") 
@@ -180,7 +182,8 @@ def _carrega_dados_partida_atual(root):
     partida_atual['combinacao'] = list()
     for dado in root.find('combinacao').findall('dado'):
         partida_atual['combinacao'].append(int(dado.text))
-    combinacao.inicializa_combinacao(partida_atual['combinacao'])
+    if partida_atual['combinacao']:
+        combinacao.inicializa_combinacao(partida_atual['combinacao'])
 
     pts = partida_atual['pts_combinacao'] = list()
     for categoria in root.find('pts_combinacao').findall('categoria'):

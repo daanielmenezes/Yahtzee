@@ -65,12 +65,12 @@ def atualiza_info():
 
     ######################## PARA TESTES
     ##### marca todas as pontuações para todos os jogadores para terminar a partida
-    info = partida.obtem_info_partida()
-    if info['status'] == 'andamento':
-        for categoria_dict in categoria.obtem_nomes():
-            for jogador_nome in info['jogadores']:
-                partida.faz_lancamento([])
-                partida.marca_pontuacao(categoria_dict['nome'])
+    #info = partida.obtem_info_partida()
+    #if info['status'] == 'andamento':
+    #    for categoria_dict in categoria.obtem_nomes():
+    #        for jogador_nome in info['jogadores']:
+    #            partida.faz_lancamento([])
+    #            partida.marca_pontuacao(categoria_dict['nome'])
    ######################## FIM PARA TESTES
 
 
