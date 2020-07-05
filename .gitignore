@@ -2,3 +2,9 @@ __pychache/
 *.pyc
 [.-]*.sw[a-p]
 saves/*.xml
+.vs/
+Generated\ Files/
+.sln
+.pyproj
+/Yahtzee.pyproj
+/Yahtzee.sln
