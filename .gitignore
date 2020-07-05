@@ -6,3 +6,5 @@ saves/*.xml
 Generated\ Files/
 .sln
 .pyproj
+/Yahtzee.pyproj
+/Yahtzee.sln

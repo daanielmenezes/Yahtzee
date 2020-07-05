@@ -5,3 +5,8 @@ Para executar o teste integrado, execute o programa testes.py no diretório prin
 A pasta saves é destinada ao arquivos XML das partidas salvas. Há uma função de testes que executa a funcionalidade que salva a partida em execução e, portanto, a cada teste rodado é gerado um arquivo XML nessa pasta para demonstração.
 
 O dicionário partida_atual do módulo partida.py e a lista combinacao no módulo combinacao.py não guardarão informações relevantes para persistirem no banco de dados, por isso decidimos permanecê-las encapsuladas nos módulos. Essas se tratam de variáveis com informações para o andamento da partida atual e restauração de uma partida pausada. Já a lista categorias do módulo categoria.py é hard-coded por não precisar ser modificada. 
+
+O jogo deverá ser executado a partir do diretório raíz do projeto (Yahtzee/).
+Python v3.8.3
+Tkinter v8.6.9
+MySQL v8.0

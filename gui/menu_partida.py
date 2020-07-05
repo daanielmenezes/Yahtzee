@@ -1,9 +1,11 @@
 from tkinter import *
 from tkinter import messagebox
-from entidades import jogador, partida
-from . import menu_principal, partida as partida_gui
+from importlib import reload
 import time
 import threading
+
+from entidades import jogador, partida
+from . import menu_principal, partida as partida_gui
 
 def atualiza_lista_jogadores( listbox ):
     nomes_jogadores = [ dados_jogador['nome'] for dados_jogador in jogador.obtem_info([]) ]
@@ -73,6 +75,10 @@ def cria_frame_lista_de_jogadores(parent):
 def inicia_partida( window, listbox ):
     # macete com threding para não travar a aplicação enquanto acessa o bd
     def thread_inicia_partida():
+        if partida.obtem_info_partida() != 1:
+            reload(partida)
+            reload(partida_gui)
+
         retorno = partida.inicia_partida(nomes)
 
         if retorno == 1:

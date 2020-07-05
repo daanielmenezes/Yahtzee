@@ -1,5 +1,9 @@
-from entidades import partida, categoria, tabela
 from tkinter import *
+import os
+
+from entidades import partida, categoria, tabela
+from . import menu_principal
+
 
 info = None
 img_dados =[]
@@ -7,10 +11,72 @@ bt_dados = []
 bt_pontuacoes = {}
 lb_turno = None
 lb_lancamentos_rest = None
+tk_window = None
+
+def transicao_tela_final( window ):
+    def obtem_pontuacao_categoria(lista_categoria, nome_categoria):
+        for categoria in lista_categoria:
+            if categoria['nome'] == nome_categoria:
+                return categoria['pontuacao']
+
+    if window._frame:
+        window._frame.destroy()
+
+    fr_tela_final = Frame( window )
+    fr_tela_final.pack()
+
+    window._frame = fr_tela_final
+
+    Label( fr_tela_final, text="PARTIDA ENCERRADA", font=('Helvetica', 20)).pack()
+
+    fr_cartelas = Frame( fr_tela_final )
+    fr_cartelas.pack()
+
+    Button( fr_tela_final, text="Voltar ao Menu Principal",
+            command = lambda: menu_principal.transicao(window) ).pack( padx=10, pady=10)
+
+    cartelas = tabela.obtem_tabelas( [], [info['data_horario']] )
+    
+    # ordena as cartelas em relação a colocacao
+    cartelas.sort( key = lambda tabela_jogador: tabela_jogador['colocacao'])
+    for cartela_jogador in cartelas:
+        fr_cartela_container = Frame( fr_cartelas )
+        fr_cartela_container.pack( side='left', padx=10, pady=10 )
+
+        Label( fr_cartela_container, text=cartela_jogador['nome_jogador'] ).pack()
+        Label( fr_cartela_container, text=str(cartela_jogador['colocacao'])+"º Lugar" ).pack(side='bottom')
+
+        fr_cartela = Frame( fr_cartela_container, bd=1, relief=SOLID )
+        fr_cartela.pack( side='left', padx=10, pady=10 )
+        Label( fr_cartela, text = "Categoria", bd=1, relief=SOLID, height=1, bg = 'light grey').grid(row=0, column = 0, sticky='news', ipadx=1, ipady=2)
+        Label( fr_cartela, text = "Pontuação", bd=1, relief=SOLID, height=1, bg = 'light grey').grid(row=0, column = 1, sticky='news', ipadx=1, ipady=2)
+
+        for i, dict_categoria in enumerate(categoria.obtem_nomes()):
+            pts = obtem_pontuacao_categoria( cartela_jogador['pontos_por_categoria'], dict_categoria['nome'])
+            Label( fr_cartela, text=dict_categoria['nome'], bd=1, relief=SOLID, height=1).grid(row=i+1, column=0, sticky='news', ipadx=1)
+            Label( fr_cartela, text=str(pts), bd=1, relief=SOLID ).grid( row=i+1, column=1, sticky='news', ipady=2 )
+        last_row = len(cartela_jogador['pontos_por_categoria'])
+        Label( fr_cartela, text="Total", bd=1, relief=SOLID, height=1).grid(row=last_row + 1, column=0, sticky='news', ipadx=1)
+        Label( fr_cartela, text=cartela_jogador['pontuacao_total'], bd=1, relief=SOLID ).grid( row=last_row+1, column=1, sticky='news', ipady=2 )
+        
 
 def atualiza_info():
     global info
+
+    ######################## PARA TESTES
+    ##### marca todas as pontuações para todos os jogadores para terminar a partida
     info = partida.obtem_info_partida()
+    if info['status'] == 'andamento':
+        for categoria_dict in categoria.obtem_nomes():
+            for jogador_nome in info['jogadores']:
+                partida.faz_lancamento([])
+                partida.marca_pontuacao(categoria_dict['nome'])
+   ######################## FIM PARA TESTES
+
+
+    info = partida.obtem_info_partida()
+
+    
 
     # atualiza turno e jogador
     lb_turno.config(text = "Turno {} - {}".format(info['turno'], info['jogador_da_vez']))
@@ -42,6 +108,9 @@ def atualiza_info():
                 pts = str(categoria_combinacao['pontuacao'])
                 bt_pontuacoes[categoria_combinacao['nome']].config(text=pts, bg="white", fg="green")
 
+    # detecta fim de jogo
+    if info['status'] == 'encerrada':
+        transicao_tela_final(tk_window)
 
 def cria_frame_cartela( parent ):
     def marca_categoria( nome_categoria ):
@@ -106,7 +175,7 @@ def cria_frame_lancamento( parent ):
     fr_lancamento = Frame( fr_lancamento_out, bd =1, relief=SOLID )
     fr_lancamento.pack(  )
     
-    Label(fr_lancamento, text="Combinacao atual:").pack()
+    Label(fr_lancamento, text="Combinação atual:").pack()
     
     global lb_lancamentos_rest
     lb_lancamentos_rest = Label(fr_lancamento_out)
@@ -129,6 +198,37 @@ def cria_frame_lancamento( parent ):
     bt_rolar = Button(fr_lancamento, text="Rolar", command = faz_lancamento)
     bt_rolar.pack(padx = 5, pady=5)
 
+def cria_frame_rodape( parent, root ):
+    def salva_partida():
+        basedir = os.getcwd()
+        cond_ret = partida.salva_partida(os.path.join(basedir, 'saves'))
+        if cond_ret == 1:
+            messagebox.showerror("Erro","Não há partida em andamento.")
+        elif cond_ret==2:
+            messagebox.showerror("Erro","Pasta 'saves' não foi encontrada.")
+        elif cond_ret==3:
+            messagebox.showerror("Erro","Erro de escrita.")
+        elif cond_ret == 0:
+            messagebox.showinfo("Sucesso","Partida salva na pasta Yahtzee/saves/.")
+    
+    def voltar_menu():
+        if not info['salva']:
+            answer = messagebox.askyesnocancel("Aviso", "Há alterações não salvas. Deseja salvar?")
+            if answer:
+                salva_partida()
+            elif answer==None:
+                return
+        partida.para_partida()
+        menu_principal.transicao(root)
+
+
+    fr_rodape = Frame(parent)
+    fr_rodape.pack(side="bottom")
+
+    Button(fr_rodape,text='Salvar Partida', command=salva_partida).pack(side='left', padx = 10, pady=10)
+    Button(fr_rodape, text='Voltar ao menu', command=voltar_menu).pack(padx=10,pady=10)
+
+
 def transicao( window ):
     if window._frame:
         window._frame.destroy()
@@ -143,10 +243,14 @@ def transicao( window ):
     lb_turno.pack()
 
     Label( fr_partida, text = "Lance os dados e escolha uma categoria para pontuar", font=('Helvetica', 16)).pack()
+    
+    cria_frame_rodape( fr_partida, window )
 
     cria_frame_lancamento(fr_partida)
 
     cria_frame_cartela( fr_partida )
 
-    atualiza_info()
+    global tk_window
+    tk_window = window
     window._frame = fr_partida
+    atualiza_info()
