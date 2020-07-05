@@ -23,6 +23,11 @@
 #    vazia na obtem_info. 
 #  Adicionado retorno 1 caso haja algum valor inválido no input de 
 #    obtem_info.
+#
+#-------------------------v1.0.2: 05/07/2020-------------------------
+#  Por: Daniel Menezes
+#  Insere_jogador atualiza rank após inserir.
+#
 #####################################################################
 
 from datetime import datetime 
@@ -74,6 +79,9 @@ def insere(nome):
 
     banco['cursor'].execute(sqlInsert,
                             (nome, data, pontuacao, recorde, ranking))
+    
+    _atualiza_rank(banco)
+
     bd.fecha_acesso(banco)
     return 0
 
