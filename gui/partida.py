@@ -48,6 +48,9 @@ def transicao_tela_final( window ):
 
         fr_cartela = Frame( fr_cartela_container, bd=1, relief=SOLID )
         fr_cartela.pack( side='left', padx=10, pady=10 )
+        Label( fr_cartela, text = "Categoria", bd=1, relief=SOLID, height=1, bg = 'light grey').grid(row=0, column = 0, sticky='news', ipadx=1, ipady=2)
+        Label( fr_cartela, text = "Pontuação", bd=1, relief=SOLID, height=1, bg = 'light grey').grid(row=0, column = 1, sticky='news', ipadx=1, ipady=2)
+
         for i, dict_categoria in enumerate(categoria.obtem_nomes()):
             pts = obtem_pontuacao_categoria( cartela_jogador['pontos_por_categoria'], dict_categoria['nome'])
             Label( fr_cartela, text=dict_categoria['nome'], bd=1, relief=SOLID, height=1).grid(row=i+1, column=0, sticky='news', ipadx=1)
@@ -62,12 +65,12 @@ def atualiza_info():
 
     ######################## PARA TESTES
     ##### marca todas as pontuações para todos os jogadores para terminar a partida
-    #info = partida.obtem_info_partida()
-    #if info['status'] == 'andamento':
-    #    for categoria_dict in categoria.obtem_nomes():
-    #        for jogador_nome in info['jogadores']:
-    #            partida.faz_lancamento([])
-    #            partida.marca_pontuacao(categoria_dict['nome'])
+    info = partida.obtem_info_partida()
+    if info['status'] == 'andamento':
+        for categoria_dict in categoria.obtem_nomes():
+            for jogador_nome in info['jogadores']:
+                partida.faz_lancamento([])
+                partida.marca_pontuacao(categoria_dict['nome'])
    ######################## FIM PARA TESTES
 
 
