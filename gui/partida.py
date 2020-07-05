@@ -5,13 +5,17 @@ info = None
 img_dados =[]
 bt_dados = []
 bt_pontuacoes = {}
+lb_turno = None
+lb_lancamentos_rest = None
 
 def atualiza_info():
     global info
     info = partida.obtem_info_partida()
 
-
-    # atualiza dados
+    # atualiza turno e jogador
+    lb_turno.config(text = "Turno {} - {}".format(info['turno'], info['jogador_da_vez']))
+    lb_lancamentos_rest.config(text="Lançamentos restantes: {}".format(info['tentativas']))
+    # atualiza lancamento
     if info['tentativas'] == 3:
         for botao in bt_dados:
             botao.config(image=img_dados[0], bg='white', relief=FLAT)
@@ -53,22 +57,21 @@ def cria_frame_cartela( parent ):
             messagebox.showinfo("Info","Categoria já marcada.")
         elif codigo_retorno == 0:
             atualiza_info()
-        return "break"
 
-    fr_cartela = Frame( parent )
-    fr_cartela.pack(padx=10, pady=10)
+    fr_cartela = Frame( parent, bd=1, relief=SOLID )
+    fr_cartela.pack(padx=100, pady=10, side="right")
 
     lb_categoria = Label( fr_cartela, text = "Categoria", bg = 'light grey', bd=1, relief = SOLID)
-    lb_categoria.grid(row = 0, column=0, sticky='news')
+    lb_categoria.grid(row = 0, column=0, sticky='news', ipady=1)
 
     lb_pontuacao = Label( fr_cartela, text = "Pontuação", bg = 'light grey', bd=1, relief = SOLID )
-    lb_pontuacao.grid( row = 0, column =1, sticky='news')
+    lb_pontuacao.grid( row = 0, column =1, sticky='news',ipady=1)
 
     for i, dict_categoria in enumerate(categoria.obtem_nomes()):
         Label( fr_cartela, text=dict_categoria['nome'], bd=1, relief=SOLID, height=1).grid(row=i+1, column=0, sticky='news', ipadx=1)
         bt_pontuacoes[dict_categoria['nome']] = Button( fr_cartela, text="", bd=1, relief=SOLID,
                                                       command = lambda nome_cat = dict_categoria['nome']: marca_categoria(nome_cat) )
-        bt_pontuacoes[dict_categoria['nome']].grid( row=i+1, column=1, sticky='news', ipady=1 )
+        bt_pontuacoes[dict_categoria['nome']].grid( row=i+1, column=1, sticky='news', ipady=2 )
 
 
 def cria_frame_lancamento( parent ):
@@ -98,9 +101,18 @@ def cria_frame_lancamento( parent ):
         elif codigo_retorno == 0:
             atualiza_info()
 
-    fr_lancamento = Frame( parent, bd =1, relief=SOLID )
-    fr_lancamento.pack( side = 'left', padx=10, pady=10 )
+    fr_lancamento_out= Frame(parent)
+    fr_lancamento_out.pack(side = 'left', padx=100, pady=10)
+    fr_lancamento = Frame( fr_lancamento_out, bd =1, relief=SOLID )
+    fr_lancamento.pack(  )
     
+    Label(fr_lancamento, text="Combinacao atual:").pack()
+    
+    global lb_lancamentos_rest
+    lb_lancamentos_rest = Label(fr_lancamento_out)
+    lb_lancamentos_rest.pack()
+
+
     img_dados.append(PhotoImage(file = "gui/assets/diceZero.gif"))
     img_dados.append(PhotoImage(file = "gui/assets/diceOne.gif"))
     img_dados.append(PhotoImage(file = "gui/assets/diceTwo.gif"))
@@ -125,6 +137,12 @@ def transicao( window ):
 
     fr_partida = Frame(window)
     fr_partida.pack(expand=True)
+
+    global lb_turno
+    lb_turno = Label( fr_partida, font = ('Helvetica', 20))
+    lb_turno.pack()
+
+    Label( fr_partida, text = "Lance os dados e escolha uma categoria para pontuar", font=('Helvetica', 16)).pack()
 
     cria_frame_lancamento(fr_partida)
 
