@@ -62,7 +62,7 @@ tabelas['Tabela'] = (
             desistencia bool,
             primary key (data_horario, nome_jogador),
             foreign key (data_horario) references Partida(data_horario),
-            foreign key (nome_jogador) references Jogador(nome)
+            foreign key (nome_jogador) references Jogador(nome) on delete cascade
         )
         """
         )
@@ -76,7 +76,7 @@ tabelas['Tabela_Pontuacao'] = (
             pontuacao int,
             primary key (data_horario, nome_jogador, nome_categoria),
             foreign key (data_horario) references Partida(data_horario),
-            foreign key (nome_jogador) references Jogador(nome)
+            foreign key (nome_jogador) references Jogador(nome) on delete cascade
         )
         """
         )

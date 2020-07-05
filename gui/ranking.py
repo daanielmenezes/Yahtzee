@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 from tkinter.ttk import Treeview, Scrollbar
 from . import menu_principal
 from entidades import jogador
@@ -8,14 +9,23 @@ def cria_label_titulo( parent ):
     lb_title.config(anchor = 'center')
     lb_title.pack(side = 'top', pady = 10)
 
-def remove_jogador():
-    print("n tem nada")
+def remove_jogador(parent, tabela):
+    if tabela.selection():
+        confirmacao = messagebox.askyesno('Remover',
+                                          'Deseja remover permanentemente este jogador?')
+        if not confirmacao:
+            return
+        for item in tabela.selection():
+            removido = tabela.item(item, "values")[0]
+        if jogador.remove(removido) == 0:
+            messagebox.showinfo("Info", "Jogador Removido")
+    else:
+        messagebox.showerror("Erro","É preciso selecionar pelo menos um jogador.")
 
 def mostra_ranking(parent):
     columns = ("zero","um","dois","tres")
     tabela = Treeview(parent, selectmode='browse', show="headings", columns=columns)
     
-
     tabela.column("zero", width=200)
     tabela.column("um", width=70)
     tabela.column("dois", width=100)
@@ -33,8 +43,7 @@ def mostra_ranking(parent):
 
     jogadores = jogador.obtem_info([])
     
-    def get_rank(player):       #para ordenar pelo rank
-        return player.get('rank')
+    #para ordenar pelo ranking:
     jogadores.sort(key = lambda x: float('inf') if x.get('ranking') is None else x.get('ranking'))
     
     for i, cada_jogador in enumerate(jogadores):
@@ -42,6 +51,7 @@ def mostra_ranking(parent):
                                      cada_jogador['recorde'],
                                      cada_jogador['pontuacao_total'],
                                      cada_jogador['ranking']))
+    return tabela
 
 def transicao( window ):
     if window._frame:
@@ -52,12 +62,12 @@ def transicao( window ):
     
     cria_label_titulo(fr_ranking)
 
-    mostra_ranking(fr_ranking)
+    tabela = mostra_ranking(fr_ranking)
 
     bt_voltar = Button(fr_ranking, text = "Voltar", command = lambda: menu_principal.transicao(window))
     bt_voltar.pack( pady = (75,5))
 
-    bt_remover = Button(fr_ranking, text = "Remover Jogador", command = lambda: remove_jogador(window))
+    bt_remover = Button(fr_ranking, text = "Remover Jogador", command = lambda: remove_jogador(window, tabela))
     bt_remover.pack( pady = (5,5))
 
 
