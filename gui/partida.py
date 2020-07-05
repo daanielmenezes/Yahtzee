@@ -1,5 +1,9 @@
-from entidades import partida, categoria, tabela
 from tkinter import *
+import os
+
+from entidades import partida, categoria, tabela
+from . import menu_principal
+
 
 info = None
 img_dados =[]
@@ -7,6 +11,7 @@ bt_dados = []
 bt_pontuacoes = {}
 lb_turno = None
 lb_lancamentos_rest = None
+tk_window = None
 
 def atualiza_info():
     global info
@@ -129,6 +134,37 @@ def cria_frame_lancamento( parent ):
     bt_rolar = Button(fr_lancamento, text="Rolar", command = faz_lancamento)
     bt_rolar.pack(padx = 5, pady=5)
 
+def cria_frame_rodape( parent, root ):
+    def salva_partida():
+        basedir = os.getcwd()
+        cond_ret = partida.salva_partida(os.path.join(basedir, 'saves'))
+        if cond_ret == 1:
+            messagebox.showerror("Erro","Não há partida em andamento.")
+        elif cond_ret==2:
+            messagebox.showerror("Erro","Pasta 'saves' não foi encontrada.")
+        elif cond_ret==3:
+            messagebox.showerror("Erro","Erro de escrita.")
+        elif cond_ret == 0:
+            messagebox.showinfo("Sucesso","Partida salva na pasta Yahtzee/saves/.")
+    
+    def voltar_menu():
+        if not info['salva']:
+            answer = messagebox.askyesnocancel("Aviso", "Há alterações não salvas. Deseja salvar?")
+            if answer:
+                salva_partida()
+            elif answer==None:
+                return
+        partida.para_partida()
+        menu_principal.transicao(root)
+
+
+    fr_rodape = Frame(parent)
+    fr_rodape.pack(side="bottom")
+
+    Button(fr_rodape,text='Salvar Partida', command=salva_partida).pack(side='left', padx = 10, pady=10)
+    Button(fr_rodape, text='Voltar ao menu', command=voltar_menu).pack(padx=10,pady=10)
+
+
 def transicao( window ):
     if window._frame:
         window._frame.destroy()
@@ -143,10 +179,14 @@ def transicao( window ):
     lb_turno.pack()
 
     Label( fr_partida, text = "Lance os dados e escolha uma categoria para pontuar", font=('Helvetica', 16)).pack()
+    
+    cria_frame_rodape( fr_partida, window )
 
     cria_frame_lancamento(fr_partida)
 
     cria_frame_cartela( fr_partida )
 
-    atualiza_info()
+    global tk_window
+    tk_window = window
     window._frame = fr_partida
+    atualiza_info()
