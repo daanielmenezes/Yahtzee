@@ -94,6 +94,10 @@ def inicia_partida( window, listbox ):
     # nomes selecionados na listbox
     nomes = [listbox.get(idx) for idx in listbox.curselection()]
     if nomes:
+        if len(nomes) > 5:
+            messagebox.showinfo("Info","O número máximo de jogadores é 5.")
+            return
+
         #cursor de loading pq inicia_partida demora um pouco
         window.config(cursor="watch")
         window.update()
