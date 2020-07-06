@@ -1,8 +1,30 @@
 Instruções para uso da aplicação:
 
-Para executar o teste integrado, execute o programa testes.py no diretório principal. Ele já cria a base de dados de nome 'Yahtzee' (e sobreescreve uma base exitente se esta tiver o mesmo nome) com as suas tabelas e ao final da execução dos testes elimina todas as tuplas de todas as tabelas. Implementamos, além dos testes, os módulos dado, avalia, combinacao, categoria, banco_de_dados, jogador, partida e tabela. Os arquivos-fonte de Dado, Avalia e Combinacao encontram-se no diretório Funcionalidades, com o nome <nome do módulo>.py. Como esses arquivos servem apenas como módulos e não serão executados individualmente no futuro, não há problema se na execução individual destes aparecer um erro referente aos "imports" feitos no programa. Podemos perceber que as suas funções de acesso passam nos testes integrados. Já o arquivo-fonte dos módulos Jogador, Partida, Tabela e Categoria encontram-se no diretório Entidades, com o nome <nome do módulo>.py. O módulo Jogo no diagrama de arquitetura é só uma no diagrama é só uma representação do local em que a interface gráfica de usuário se comunicará com os outros módulos da aplicação. 
+Para executar o teste integrado, execute o programa testes.py no diretório principal. Ele já cria a base de dados de nome 'Yahtzee' (e sobreescreve uma base exitente se esta tiver o mesmo nome) com as suas tabelas e ao final da execução dos testes elimina todas as tuplas de todas as tabelas. Para rodar o jogo, basta executar o arquivo jogo.py no diretório principal. Na primeira vez que é executado, o programa cria a base de dados 'Yahtzee' e sobreescreve uma base existente se esta tiver o mesmo nome. Vamos agora apresentar o passo-a-passo de um caminho para acessar e testar todas as funcionalidades do jogo após executar o arquivo jogo.py.
 
-A pasta saves é destinada ao arquivos XML das partidas salvas. Há uma função de testes que executa a funcionalidade que salva a partida em execução e, portanto, a cada teste rodado é gerado um arquivo XML nessa pasta para demonstração.
+Primeiramente será apresentada uma mensagem de criação do banco de dados, já que esta será a primeira vez que o arquivo é executado. Clique em "ok". Em seguida:
+
+1- Clique em "Nova Partida". Isso chamará a tela de iniciar uma nova partida.
+2- Clique na caixa de texto "nome"e digite o nome do jogador a ser criado para jogar. Este nome deve ser único e ter no máximo 11 caracteres. Podemos criar mais de um, se for o caso. Se já existirem jogadores no banco, estes aparecerão na tabela à esquerda.
+3- Selecione o(s) jogador(es) que participarão da nova partida clicando em cima de seus nomes no menu da esquerda. Clique em "Iniciar Partida" para começar. Obs: para efeitos de teste, uma partida com um jogador será mais rápida.
+4- Na caixa da esquerda, clique em "rolar" para fazer o primeiro lançamento.
+5- Selecione os dados que se deseja manter para o novo lançamento (cada jogador tem direito a três lançamentos por turno) e clique em rolar novamente. Caso prefira marcar uma categoria de primeira, pode fazer isso também
+6- Escolha a categoria em que deseja pontuar na cartela da direita clicando em cima da pontuação correspondente (as pontuações em verde indicam quanto essa combinação de dados pontuaria para aquela categoria). Isso deixará a pontuação em cinza, indicando que a categoria já foi pontuada.
+7- Clique em "Salvar Partida" para salvar as informações referentes à partida atual em um arquivo xml e escolha o nome do arquivo a ser salvo.
+8- Clique em "Voltar ao menu"
+9- Clique em "Continuar" e, em seguida, em "Escolher arquivo do save"
+10- Escolha o arquivo criado anteriormente correspondente à partida iniciada para continuar a partida salva do ponto em que ela foi parada
+11- Repita o processo de rolar os dados + marcar categoria até todas as categorias estarem preenchidas. Você verá as cartelas finais dos jogadores da partida, assim como suas colocações e pontuações totais
+12- Clique em "Voltar ao menu principal" e depois em "Jogadores"
+13- Teremos aí uma tabela com todos os jogadores salvos com as suas informações e ranking. Selecione um jogador da tabela clicando com o mouse e clique em remover jogador.
+14- Também podemos adicionar um jogador nesta tela, basta clicar na caixa de texto "nome", digitar o nome do jogador a ser criado e clicar em "criar"
+
+
+Yahtzee com categorias e regras originais, sem os bônus. Cada partida tem 13 rodadas.
+
+O módulo Jogo no diagrama de arquitetura é só uma representação do local em que a interface gráfica de usuário se comunicará com os outros módulos da aplicação. 
+
+A pasta saves é destinada ao arquivos XML das partidas salvas. É o diretório padrão para o usuário salvar e abrir as partidas, mas ele pode escolher salvar em outros diretórios também.
 
 O dicionário partida_atual do módulo partida.py e a lista combinacao no módulo combinacao.py não guardarão informações relevantes para persistirem no banco de dados, por isso decidimos permanecê-las encapsuladas nos módulos. Essas se tratam de variáveis com informações para o andamento da partida atual e restauração de uma partida pausada. Já a lista categorias do módulo categoria.py é hard-coded por não precisar ser modificada. 
 
