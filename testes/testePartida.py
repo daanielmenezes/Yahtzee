@@ -167,8 +167,8 @@ class Test(unittest.TestCase):
     def test_AAA_salva_partida_ok_condicao_retorno(self):
         print("Caso de Teste AAA - Salva partida sucesso.")
         dir_raiz = path.dirname(path.realpath(__file__))
-        saves = path.join(dir_raiz, 'saves') 
-        retorno = partida.salva_partida(saves)
+        arquivo = open(path.join(dir_raiz, 'saves','test_salva_partida_ok.xml'),"w")
+        retorno = partida.salva_partida(arquivo)
         self.assertEqual(retorno, 0)
 
     def test_AAA_salva_partida_nok_path_invalido(self):
@@ -185,9 +185,8 @@ class Test(unittest.TestCase):
 
     def test_AAA_continua_partida_ok(self):
         print("Caso de Teste AAA - Continua partida com sucesso.")
-        data_horario = partida.obtem_info_partida()['data_horario']
-        data_horario = datetime.strftime(data_horario,'%Y%m%d%H%M%S') + '.xml'
-        arq = path.join(path.realpath(path.dirname(__file__)),'saves',data_horario)
+        nome_arquivo = 'test_salva_partida_ok.xml'
+        arq = path.join(path.realpath(path.dirname(__file__)),'saves',nome_arquivo)
         retorno = partida.continua_partida(arq)
         self.assertEqual( retorno, 0 )
 
