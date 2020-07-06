@@ -3,6 +3,7 @@ from tkinter import messagebox, filedialog
 from . import menu_principal, partida as partida_gui
 from entidades import partida
 import os
+import importlib
 
 def cria_label_titulo( parent ):
     lb_title = Label(parent, text = "Continuar Partida", fg = "black", font = "none 20 bold")
@@ -16,6 +17,9 @@ def escolhe_arquivo( parent):
                                                      title = "Escolha arquivo do save",
                                                      filetypes = (("xml files","*.xml"),))
     if parent.nome_arquivo:
+        if partida.obtem_info_partida()!= 1:
+            importlib.reload(partida)
+            importlib.reload(partida_gui)
         retorno = partida.continua_partida(parent.nome_arquivo)
         if retorno == 1:
             messagebox.showerror("Erro", "Não foi possível ler o arquivo")
