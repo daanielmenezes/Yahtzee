@@ -5,6 +5,9 @@ import os
 from entidades import partida, categoria, tabela
 from . import menu_principal
 
+__all__ = ['transicao']
+
+
 info = None
 img_dados =[]
 bt_dados = []

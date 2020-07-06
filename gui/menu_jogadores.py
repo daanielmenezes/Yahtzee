@@ -4,6 +4,8 @@ from tkinter.ttk import Treeview, Scrollbar
 from . import menu_principal
 from entidades import jogador
 
+__all__ = ['transicao']
+
 def atualiza_lista_jogadores( tree ):
     jogadores = jogador.obtem_info([])
     tree.delete(*tree.get_children())

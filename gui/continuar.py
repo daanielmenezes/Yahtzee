@@ -5,6 +5,8 @@ from entidades import partida
 import os
 import importlib
 
+__all__ = ['transicao']
+
 def cria_label_titulo( parent ):
     lb_title = Label(parent, text = "Continuar Partida", fg = "black", font = "none 20 bold")
     lb_title.config(anchor = 'center')

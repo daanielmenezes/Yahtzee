@@ -7,6 +7,9 @@ import threading
 from entidades import jogador, partida
 from . import menu_principal, partida as partida_gui
 
+__all__ = ['transicao']
+
+
 def atualiza_lista_jogadores( listbox ):
     nomes_jogadores = [ dados_jogador['nome'] for dados_jogador in jogador.obtem_info([]) ]
     listbox.delete(0, END)

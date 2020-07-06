@@ -1,6 +1,9 @@
 from tkinter import *
 from . import menu_partida, menu_jogadores, continuar
 
+__all__ = ['transicao']
+
+
 def transicao( window ):
     if window._frame:
         window._frame.destroy()

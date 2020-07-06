@@ -1,0 +1,7 @@
+Relatório Entrega 4 Trabalho Programação Modular - 06/07/20
+Aluno: Bruno Coutinho Moretta Monteiro
+
+04/07 - Mockup das telas - 02 horas
+05/07 - Criação do módulo continuar - 04 horas
+05/07 - Criação do módulo menu_jogadores - 06 horas
+06/07 - Documentação do caminho de execução do jogo - 01 horas
