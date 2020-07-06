@@ -1,0 +1,7 @@
+Relatório Entrega 4 Trabalho Programação Modular - 06/07/20
+Aluno: Daniel Menezes Cavalcante Lemos dos Passos
+
+03/07       - Criação do Menu principal - 03 horas
+04/07       - Criação menu partida      - 04 horas
+05/07..6/07 - Criação da gui de partida - 15 horas
+06/07       - Atualização do diagrama   - 20 minutos
