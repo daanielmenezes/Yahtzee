@@ -44,6 +44,7 @@ def thread_cria_bd():
 
 window = Tk()
 window.title("Yahtzee")
+window.resizable(width=False, height=False)
 
 config = configparser.ConfigParser()
 config.optionxform = str
