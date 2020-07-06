@@ -179,7 +179,18 @@ def _carrega_dados_partida_atual(root):
     data_horario_string = root.find('data_horario').text
     partida_atual['data_horario'] = datetime.strptime(data_horario_string,
             "%Y-%m-%d %H:%M:%S") 
+    banco = banco_de_dados.abre_acesso()
+    sql_partida = """INSERT INTO Partida VALUES (%s, %s)"""
+    try:
+        banco['cursor'].execute(sql_partida, (partida_atual['data_horario'], 'andamento'))
+    except:
+        sql_partida = """UPDATE Partida SET status="andamento" where data_horario = %"""
+        try:
+            banco['cursor'].execute(sql_partida, (partida_atual['data_horario']))
+        except:
+            pass
 
+    banco_de_dados.fecha_acesso(banco)
     partida_atual['combinacao'] = list()
     for dado in root.find('combinacao').findall('dado'):
         partida_atual['combinacao'].append(int(dado.text))
