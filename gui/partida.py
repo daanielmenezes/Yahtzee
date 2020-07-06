@@ -126,7 +126,7 @@ def cria_frame_cartela( parent ):
 
     for i, dict_categoria in enumerate(categoria.obtem_nomes()):
         Label( fr_cartela, text=dict_categoria['nome'], bd=1, relief=SOLID, height=1).grid(row=i+1, column=0, sticky='news', ipadx=1)
-        bt_pontuacoes[dict_categoria['nome']] = Button( fr_cartela, text="", bd=1, relief=SOLID,
+        bt_pontuacoes[dict_categoria['nome']] = Button( fr_cartela, text="", bd=1, relief=SOLID, cursor="hand2",
                                                       command = lambda nome_cat = dict_categoria['nome']: marca_categoria(nome_cat) )
         bt_pontuacoes[dict_categoria['nome']].grid( row=i+1, column=1, sticky='news', ipady=2 )
 
@@ -180,7 +180,7 @@ def cria_frame_lancamento( parent ):
 
     for i in range(5):
         bt_dados.append(Button(fr_lancamento, image = img_dados[0], relief=FLAT,
-                              command = lambda i=i: seleciona_dado(i)))
+                              command = lambda i=i: seleciona_dado(i), cursor='hand2'))
         bt_dados[i].pack(padx=5, pady=5)
 
     bt_rolar = Button(fr_lancamento, text="Rolar", command = faz_lancamento)
