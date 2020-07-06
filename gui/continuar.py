@@ -31,11 +31,11 @@ def transicao( window ):
         window._frame.destroy()
 
     fr_continuar = Frame(window)
-    fr_continuar.pack()
+    fr_continuar.pack(padx=20, pady=20)
     
     cria_label_titulo(fr_continuar)
 
-    bt_voltar = Button(fr_continuar, text = "Voltar", command = lambda: menu_principal.transicao(window))
+    bt_voltar = Button(fr_continuar, text = "Voltar ao Menu Principal", command = lambda: menu_principal.transicao(window))
     bt_voltar.pack(side = 'bottom', padx = 20, pady = (15))
 
     bt_escolher = Button(fr_continuar, text = "Escolher arquivo do save", command = lambda: escolhe_arquivo(window))
