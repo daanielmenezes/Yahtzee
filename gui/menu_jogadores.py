@@ -48,7 +48,7 @@ def cria_frame_novoJogador(parent, tree):
     bt_novoJogador.pack(fill = X, padx = 5, pady = 5)
 
 def cria_label_titulo( parent ):
-    lb_title = Label(parent, text = "Ranking dos Jogadores", fg = "black", font = "none 20 bold")
+    lb_title = Label(parent, text = "Jogadores", fg = "black", font = "none 20 bold")
     lb_title.config(anchor = 'center')
     lb_title.pack(side = 'top', pady = 10)
 
