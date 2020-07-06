@@ -203,7 +203,6 @@ def cria_frame_rodape( parent, root ):
     def salva_partida():
         global save_criado
         if save_criado:
-            print(save_criado)
             try:
                 arquivo = open(save_criado,"w")
             except:
@@ -215,6 +214,9 @@ def cria_frame_rodape( parent, root ):
                                                 title="Escolha um nome e local para salvar.",
                                                 initialdir="saves/", initialfile="Novo Save",
                                                 filetypes=(("arquivos xml", "*.xml"),))
+            if arquivo == None:
+                messagebox.showinfo("Info","Nenhum arquivo selecionado.")
+                return
             save_criado = arquivo.name
         cond_ret = partida.salva_partida(arquivo)
         if cond_ret == 1:
