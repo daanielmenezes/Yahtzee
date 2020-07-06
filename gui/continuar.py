@@ -36,9 +36,9 @@ def transicao( window ):
     cria_label_titulo(fr_continuar)
 
     bt_voltar = Button(fr_continuar, text = "Voltar", command = lambda: menu_principal.transicao(window))
-    bt_voltar.pack(side = 'left', padx = 20, pady = (75,5))
+    bt_voltar.pack(side = 'bottom', padx = 20, pady = (15))
 
     bt_escolher = Button(fr_continuar, text = "Escolher arquivo do save", command = lambda: escolhe_arquivo(window))
-    bt_escolher.pack( padx = 20, pady = (75,5))
+    bt_escolher.pack( padx = 20)
 
     window._frame = fr_continuar
