@@ -64,20 +64,7 @@ def transicao_tela_final( window ):
 def atualiza_info():
     global info
 
-    ######################## PARA TESTES
-    ##### marca todas as pontuações para todos os jogadores para terminar a partida
-    #info = partida.obtem_info_partida()
-    #if info['status'] == 'andamento':
-    #    for categoria_dict in categoria.obtem_nomes():
-    #        for jogador_nome in info['jogadores']:
-    #            partida.faz_lancamento([])
-    #            partida.marca_pontuacao(categoria_dict['nome'])
-   ######################## FIM PARA TESTES
-
-
-    info = partida.obtem_info_partida()
-
-    
+    info = partida.obtem_info_partida()    
 
     # atualiza turno e jogador
     lb_turno.config(text = "Jogada {} - {}".format(info['turno'], info['jogador_da_vez']))
@@ -258,6 +245,8 @@ def transicao( window ):
     lb_turno.pack()
 
     Label( fr_partida, text = "Lance os dados e escolha uma categoria para pontuar", font=('Helvetica', 16)).pack()
+    if info and info['tentativas'] <3:
+        Label( fr_partida, text = "Escolha dados a serem mantidos para próximo lançamento", font=('Helvetica', 9)).pack(anchor = 'w',padx = 10, pady = (50,0))
     
     cria_frame_rodape( fr_partida, window )
 

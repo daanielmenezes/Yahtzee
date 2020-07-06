@@ -18,6 +18,7 @@ Primeiramente será apresentada uma mensagem de criação do banco de dados, já
 12- Clique em "Voltar ao menu principal" e depois em "Jogadores"
 13- Teremos aí uma tabela com todos os jogadores salvos com as suas informações e ranking. Selecione um jogador da tabela clicando com o mouse e clique em remover jogador.
 14- Também podemos adicionar um jogador nesta tela, basta clicar na caixa de texto "nome", digitar o nome do jogador a ser criado e clicar em "criar"
+15- Finalmente, volte para o menu principal e clique em "sair do jogo"
 
 
 Yahtzee com categorias e regras originais, sem os bônus. Cada partida tem 13 rodadas.
