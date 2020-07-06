@@ -103,11 +103,11 @@ def transicao( window ):
     tabela = mostra_ranking(fr_ranking)
 
     cria_frame_novoJogador(fr_ranking, tabela)
-
-    bt_voltar = Button(fr_ranking, text = "Voltar", command = lambda: menu_principal.transicao(window))
-    bt_voltar.pack( pady = (75,5))
-
+   
     bt_remover = Button(fr_ranking, text = "Remover Jogador", command = lambda: remove_jogador(window, tabela))
-    bt_remover.pack( pady = (5,5))
+    bt_remover.pack( pady = (75,5))
+    
+    bt_voltar = Button(fr_ranking, text = "Voltar ao Menu Principal", command = lambda: menu_principal.transicao(window))
+    bt_voltar.pack( pady = (5,10))
 
     window._frame = fr_ranking

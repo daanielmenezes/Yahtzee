@@ -44,6 +44,7 @@ def thread_cria_bd():
 
 window = Tk()
 window.title("Yahtzee")
+window.iconbitmap("gui/assets/icon.ico")
 window.resizable(width=False, height=False)
 
 config = configparser.ConfigParser()
