@@ -1,9 +1,9 @@
 from tkinter import *
+from tkinter import filedialog
 import os
 
 from entidades import partida, categoria, tabela
 from . import menu_principal
-
 
 info = None
 img_dados =[]
@@ -12,6 +12,7 @@ bt_pontuacoes = {}
 lb_turno = None
 lb_lancamentos_rest = None
 tk_window = None
+save_criado = False
 
 def transicao_tela_final( window ):
     def obtem_pontuacao_categoria(lista_categoria, nome_categoria):
@@ -200,16 +201,30 @@ def cria_frame_lancamento( parent ):
 
 def cria_frame_rodape( parent, root ):
     def salva_partida():
-        basedir = os.getcwd()
-        cond_ret = partida.salva_partida(os.path.join(basedir, 'saves'))
+        global save_criado
+        if save_criado:
+            try:
+                arquivo = open(save_criado,"w")
+            except:
+                messagebox.showerror("Erro","Erro de escrita.")
+                return
+
+        else:
+            arquivo = filedialog.asksaveasfile(mode="w", defaultextension="xml",
+                                                title="Escolha um nome e local para salvar.",
+                                                initialdir="saves/", initialfile="Novo Save",
+                                                filetypes=(("arquivos xml", "*.xml"),))
+            if arquivo == None:
+                messagebox.showinfo("Info","Nenhum arquivo selecionado.")
+                return
+            save_criado = arquivo.name
+        cond_ret = partida.salva_partida(arquivo)
         if cond_ret == 1:
             messagebox.showerror("Erro","Não há partida em andamento.")
         elif cond_ret==2:
-            messagebox.showerror("Erro","Pasta 'saves' não foi encontrada.")
-        elif cond_ret==3:
             messagebox.showerror("Erro","Erro de escrita.")
         elif cond_ret == 0:
-            messagebox.showinfo("Sucesso","Partida salva na pasta Yahtzee/saves/.")
+            messagebox.showinfo("Sucesso","Partida salva com sucesso!")
     
     def voltar_menu():
         if not info['salva']:
