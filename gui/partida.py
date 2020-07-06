@@ -80,7 +80,7 @@ def atualiza_info():
     
 
     # atualiza turno e jogador
-    lb_turno.config(text = "Turno {} - {}".format(info['turno'], info['jogador_da_vez']))
+    lb_turno.config(text = "Jogada {} - {}".format(info['turno'], info['jogador_da_vez']))
     lb_lancamentos_rest.config(text="Lançamentos restantes: {}".format(info['tentativas']))
     # atualiza lancamento
     if info['tentativas'] == 3:

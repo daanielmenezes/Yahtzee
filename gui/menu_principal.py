@@ -1,5 +1,5 @@
 from tkinter import *
-from . import menu_partida, ranking, continuar
+from . import menu_partida, menu_jogadores, continuar
 
 def transicao( window ):
     if window._frame:
@@ -17,7 +17,7 @@ def transicao( window ):
     bt_novaPartida = Button(fr_menuPrincipal, text = "Continuar", command = lambda: continuar.transicao(window))
     bt_novaPartida.pack( pady = (5,5))
 
-    bt_novaPartida = Button(fr_menuPrincipal, text = "Ranking", command = lambda: ranking.transicao(window))
+    bt_novaPartida = Button(fr_menuPrincipal, text = "Jogadores", command = lambda: menu_jogadores.transicao(window))
     bt_novaPartida.pack( pady = (5,5))
 
     window._frame = fr_menuPrincipal
