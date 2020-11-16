@@ -68,6 +68,7 @@ from os.path import isdir, join
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element, SubElement, Comment
 from xml.dom import minidom
+from io import IOBase
 
 from entidades import tabela
 from entidades.jogador import valida_jogador, insere as insere_jogador, atualiza_info as atualiza_jogador
@@ -136,17 +137,19 @@ def _preenche_element_tree_partida_atual(elem_partida):
                 elem_nome = SubElement(sub_elem, 'nome')
                 elem_nome.text = nome_jogador
         elif key == 'combinacao':
-            for dado in value:
-                elem_dado = SubElement(sub_elem, 'dado')
-                elem_dado.text = str(dado)
+            if value:
+                for dado in value:
+                    elem_dado = SubElement(sub_elem, 'dado')
+                    elem_dado.text = str(dado)
         elif key == 'pts_combinacao':
-            for categoria in value:
-                elem_categoria = SubElement(sub_elem, 'categoria')
-                elem_categoria_nome = SubElement(elem_categoria, 'nome')
-                elem_categoria_pontuacao = SubElement(elem_categoria,
-                        'pontuacao')
-                elem_categoria_nome.text = categoria['nome']
-                elem_categoria_pontuacao.text = str(categoria['pontuacao'])
+            if value:
+                for categoria in value:
+                    elem_categoria = SubElement(sub_elem, 'categoria')
+                    elem_categoria_nome = SubElement(elem_categoria, 'nome')
+                    elem_categoria_pontuacao = SubElement(elem_categoria,
+                            'pontuacao')
+                    elem_categoria_nome.text = categoria['nome']
+                    elem_categoria_pontuacao.text = str(categoria['pontuacao'])
         else:
             sub_elem.text = str(value)
     return
@@ -172,15 +175,27 @@ def _preenche_element_tree_tabelas(elem_partida):
                 
 
 def _carrega_dados_partida_atual(root):
-    partida_atual = {}
+    partida_atual.clear()
     data_horario_string = root.find('data_horario').text
     partida_atual['data_horario'] = datetime.strptime(data_horario_string,
             "%Y-%m-%d %H:%M:%S") 
+    banco = banco_de_dados.abre_acesso()
+    sql_partida = """INSERT INTO Partida VALUES (%s, %s)"""
+    try:
+        banco['cursor'].execute(sql_partida, (partida_atual['data_horario'], 'andamento'))
+    except:
+        sql_partida = """UPDATE Partida SET status="andamento" where data_horario = %"""
+        try:
+            banco['cursor'].execute(sql_partida, (partida_atual['data_horario']))
+        except:
+            pass
 
+    banco_de_dados.fecha_acesso(banco)
     partida_atual['combinacao'] = list()
     for dado in root.find('combinacao').findall('dado'):
         partida_atual['combinacao'].append(int(dado.text))
-    combinacao.inicializa_combinacao(partida_atual['combinacao'])
+    if partida_atual['combinacao']:
+        combinacao.inicializa_combinacao(partida_atual['combinacao'])
 
     pts = partida_atual['pts_combinacao'] = list()
     for categoria in root.find('pts_combinacao').findall('categoria'):
@@ -435,18 +450,18 @@ def obtem_partidas(data_horario = [], status = []):
 #############################################################
 # Salva a partida em andamento em um arquivo XML.
 #
-#  path: caminho para a pasta onde o arquivo será criado. 
+#  arquivo: arquivo aberto em modo de escrita. 
 #
 #  retorna 0 em caso de sucesso
 #   ou retorna 1 caso não haja partida em andamento
-#   ou retorna 2 caso o caminho não seja econtrado
+#   ou retorna 2 caso arquivo não seja do tipo certo
 #   ou retorna 3 caso haja erro de escrita.
 #
 #############################################################
-def salva_partida(path):
+def salva_partida(arquivo):
     if not _ha_partida_em_andamento():
         return 1
-    if not isdir(path):
+    if not isinstance(arquivo, IOBase):
         return 2
     
     elem_partida = Element('partida')
@@ -457,11 +472,9 @@ def salva_partida(path):
     reparsed = minidom.parseString(rough_string)
     final_string = reparsed.toprettyxml(indent="  ")
 
-    arquivo_nome = partida_atual['data_horario'].strftime('%Y%m%d%H%M%S')
-    arquivo_nome += ".xml"
     try:
-        with open(join(path,arquivo_nome), 'w') as xml_file:
-            xml_file.write(final_string)
+        arquivo.write(final_string)
+        arquivo.close()
     except:
         return 3
 
